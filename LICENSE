@@ -1,12 +1,44 @@
 Aion Helper
+Copyright (c) 2026 LusitanoScripts. All rights reserved.
+
+The source code is public so it can be read, checked and improved. It is not
+open source: it is source-available, under the rules below.
+
+YOU MAY
+  - Download and use the app.
+  - Share the official executable, unmodified.
+  - Read the code, and build it for personal use.
+  - Propose changes in the official repository (issues and pull requests). By
+    sending a contribution, you allow the author to use it in the app, under
+    this same license.
+
+YOU MAY NOT, without the author's written permission
+  - Distribute modified versions of the app, or parts of the code in other apps.
+  - Remove, hide or change the author credit ("by LusitanoScripts") or the
+    credits to the data sources.
+  - Sell the app, charge for it, or include it in paid products.
+
+NO WARRANTY
+  The app is provided as is, without warranty of any kind. The author is not
+  liable for any damage, loss or penalty resulting from its use.
+
+NOT AFFILIATED WITH NCSOFT
+  Fan-made app. Aion and AION 2 are trademarks of NCSoft. Item names, icons and
+  character data come from NCSoft's official website; prices from aion2.exchange.
+
+---
+
+Português
+
+Aion Helper
 Copyright (c) 2026 LusitanoScripts. Todos os direitos reservados.
 
 O código está público para se poder ler, verificar e melhorar. Não é código
 aberto: é código à vista, com as regras abaixo.
 
 PODES
-  - Descarregar, instalar e usar a app.
-  - Partilhar o instalador oficial, sem alterações.
+  - Descarregar e usar a app.
+  - Partilhar o executável oficial, sem alterações.
   - Ler o código, e compilá-lo para uso pessoal.
   - Propor alterações no repositório oficial (issues e pull requests). Ao
     enviares uma contribuição, autorizas o autor a usá-la na app, sob esta
@@ -23,13 +55,6 @@ SEM GARANTIAS
   por danos, perdas ou sanções resultantes do seu uso.
 
 SEM LIGAÇÃO À NCSOFT
-  App de fãs. Aion e AION 2 são marcas da NCSoft. Os nomes e ícones dos itens
-  vêm do site oficial da NCSoft; os preços do aion2.exchange.
-
----
-
-English summary: source-available, not open source. You may use the app, share
-the official installer unmodified, read the code and send contributions. You may
-not distribute modified versions, remove or alter the author credit
-("by LusitanoScripts") or the data-source credits, or sell the app, without the
-author's written permission. No warranty. Not affiliated with NCSoft.
+  App de fãs. Aion e AION 2 são marcas da NCSoft. Os nomes e ícones dos itens e
+  os dados dos personagens vêm do site oficial da NCSoft; os preços do
+  aion2.exchange.

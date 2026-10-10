@@ -30,7 +30,7 @@ assert.ok(sobre[0].includes('NCSoft'), 'o Sobre já não diz que é uma app de f
 assert.strictEqual(pkg.author, 'LusitanoScripts');
 assert.ok(pkg.build.copyright.includes('LusitanoScripts'));
 assert.strictEqual(pkg.license, 'SEE LICENSE IN LICENSE', 'a licença do package.json não aponta para o LICENSE');
-assert.ok(/Todos os direitos reservados/.test(licenca) && licenca.includes('by LusitanoScripts'), 'a licença mudou');
+assert.ok(/All rights reserved/.test(licenca) && /Todos os direitos reservados/.test(licenca) && licenca.includes('by LusitanoScripts'), 'a licença mudou');
 
 // A selagem do instalador: sem isto, mudar o HTML dentro do app.asar e voltar a
 // empacotar dava uma cópia sem créditos que arrancava na mesma.

@@ -1,112 +1,107 @@
 # Aion Helper
 
-Companheiro para o **Aion 2** (Global): preços do mercado por servidor, com os nomes e os ícones em português, e o valor da tua mochila lido do ecrã.
+*English · [Português](README.pt.md)*
 
-**Usar:** `dist/Aion-Helper-<versão>-portable.exe`: um só ficheiro, abre-se com duplo clique, não instala nada. Gera-se com `npm run dist`. As definições, notas e builds ficam em `%APPDATA%\aion-helper`.
-**Desenvolver:** duplo clique em `Aion Helper.bat`.
+Companion app for **Aion 2** (Global): market prices per server, the value of your inventory read from the screen, the price and your note right under each item tooltip in game, an item database, character sheets, skill builds and a Daevanion planner.
 
-App de fãs, sem ligação à NCSoft. Não toca no jogo: só vê o ecrã e mostra uma janela por cima.
+## Download
 
-## De onde vêm os dados
+**[Get `Aion-Helper-<version>-portable.exe` from the Releases page](https://github.com/LusitanoScripts/aion-helper/releases/latest).**
 
-| O quê | Origem | Notas |
+It's a **portable version: a single file, nothing to install on your PC.** Double-click it and it runs. To update, just replace the `.exe`; your settings, notes and builds are kept in `%APPDATA%\aion-helper`.
+
+The first time, Windows may show "Windows protected your PC" (the file isn't signed by a publisher). Click **More info → Run anyway**.
+
+> **Language:** the app's interface is in **Portuguese** for now. Item names, skills and OCR follow your game language (English, German, Spanish, French, Japanese or Portuguese, set in Definições / Settings).
+
+Fan-made app, not affiliated with NCSoft. **It doesn't touch the game**: it doesn't read memory, intercept network traffic, change files or press keys for you. It only looks at the screen, like a screenshot tool, and shows a window on top.
+
+## Features
+
+- **Prices** (*Preços*): market prices per server, with history, depth and price-drop alerts.
+- **Inventory** (*Mochila*): open the Cube in game, click *Ler a mochila*, and the app reads quantities and items from the screen and tells you what it's worth.
+- **Under the item tooltip**: whenever the game opens an item tooltip, a strip appears under it with the price, what you get after the 8% market fee, whether the vendor pays more, and your note.
+- **Items** (*Itens*): 8,139 items in the Global version, searchable by name (English or Portuguese) or id, with category, grade, class and tradable filters. Details (stats, manastones, where to get it, appearance) at any enchant level.
+- **Character** (*Personagem*): any player's official sheet: combat power, item level, stats, gear (click a piece for its stats and stones), wings, pet, titles, skills and Daevanion boards. *Criar build com isto* turns it into a build.
+- **Builds**: 4×12 skill bar (drag and drop), skill levels and specializations (◆), priority lists, macros and notes. **Daevanion** planner with the 5 boards of each class and the sum of everything you open. Import from your character, and share a build with an `AH1:…` code.
+- **Notes**: a note per item, shown under its tooltip in game (also for bound items).
+
+The game must run in **borderless window** mode: in exclusive fullscreen no window can stay on top.
+
+## Where the data comes from
+
+| What | Source | Notes |
 |---|---|---|
-| Preços, histórico, profundidade | [aion2.exchange](https://aion2.exchange/) (`/api`, aberto) | Recolhe de 15 em 15 min. Projeto de uma pessoa só; quando falha, a app mostra os preços guardados e avisa. |
-| Nome em português, ícone, raridade | Site oficial da NC (`aion2.plaync.com/pt-br/api/gameconst/item`) | Um pedido por item (~0,2 s). Guardado 30 dias. |
-| Habilidades das classes, personagens | Site oficial da NC (`/api/character/equipment`, `api-search.plaync.com`) | Catálogo de cada classe guardado 7 dias. |
-| Tabuleiros Daevanion, fichas de personagem | Site oficial da NC (`/api/character/info`, `/daevanion/detail`, `/equipment/item`) | Tabuleiros de cada classe guardados 7 dias. |
-| Lista de todos os itens | Dicionário oficial de Taiwan (`tw.ncsoft.com/aion2_tw/v2.0/dict/search/item`) + ficha global | Gerada uma vez por `node scripts/gerar-itens.js` para `src/dados/itens.json`, que vai dentro da app. |
+| Prices, history, depth | [aion2.exchange](https://aion2.exchange/) (`/api`, open) | Updated every 15 min. A one-person project; when it's down, the app shows the saved prices and says so. |
+| Item names, icons, grades | NCSoft's official site (`aion2.plaync.com/<lang>/api/gameconst/item`) | One request per item (~0.2 s). Cached 30 days. |
+| Class skills, characters | NCSoft's official site (`/api/character/equipment`, `api-search.plaync.com`) | Each class's skill list cached 7 days. |
+| Daevanion boards, character sheets | NCSoft's official site (`/api/character/info`, `/daevanion/detail`, `/equipment/item`) | Each class's boards cached 7 days. |
+| List of all items | NCSoft's official Taiwan dictionary (`tw.ncsoft.com/aion2_tw/v2.0/dict/search/item`) + the Global item sheet | Built once by `node scripts/gerar-itens.js` into `src/dados/itens.json`, which ships with the app. |
 
-As duas fontes ligam-se pelo **id do item**, nunca pelo nome.
+Sources are joined by **item id**, never by name.
 
-## O que o "Valor" quer dizer
+## What "Value" means
 
-- **VENDIDO**: o preço médio das vendas reais. Só existe num servidor (Kaisinel EU, Elyos).
-- **PEDIDO**: o anúncio mais barato nesse momento. É o que há nos outros 97 servidores, e pode ser lixo (anúncios a 10 M de um item que vale 1 K). Os casos suspeitos levam ⚠.
-- **Referência (72 h)**, no detalhe: a mediana do anúncio mais barato hora a hora. Um anúncio isolado não a consegue puxar. É o número em que se pode confiar.
-- **Recebes**: o valor menos a taxa de 8% do mercado.
+- **VENDIDO** (sold): the average price of real sales. Only one server has it (Kaisinel EU, Elyos).
+- **PEDIDO** (asked): the cheapest listing right now. That's all the other 97 servers have, and it can be junk (a 10 M listing for an item worth 1 K). Suspicious cases get a ⚠.
+- **Reference (72 h)**, in the detail panel: the median of the cheapest listing hour by hour. A single listing can't drag it. It's the number to trust.
+- **Recebes** (you get): the value minus the 8% market fee.
 
-## Mochila
+## Inventory reading
 
-Abre o **Cubo** no jogo, e na aba Mochila carrega em **Ler a mochila**. A app esconde-se, tira uma foto de cada ecrã e volta.
+- **Finding the inventory**: the app finds it by the stack numbers (fixed-shape digits, always in the same corner of the slot). No calibration needed, but at least 2 stacks with a number must be visible.
+- **Quantities**: matched against templates of the game's digits (`src/moldes-1440.json`), not OCR. Windows OCR read "381,3K" as "381r3K".
+- **Which item**: by icon, compared with the official icons of market items. An item is accepted only with difference ≤ 15 and a margin ≥ 5 over the runner-up. The rest is "off market", which is where bound items land.
+- **Measured at 2560×1440.** Other resolutions are scaled to 1440p first and marked as experimental. Synthetic tests: 4K 35/35 quantities, 1600p 32, 1200p 33, 1080p 27; no item misidentified. A real 1080p capture is still needed to tune it.
+- The last image read is kept in `%APPDATA%\aion-helper\ultima-mochila.png`, to understand a bad read.
 
-- **Onde está a mochila**: a app encontra-a sozinha pelos números das pilhas (algarismos com forma fixa, sempre no mesmo canto da casa). Não precisa de calibração, mas precisa de pelo menos 2 pilhas com número à vista.
-- **Quantidades**: comparadas com moldes dos algarismos do jogo (`src/moldes-1440.json`), não com OCR. O OCR do Windows lia "381,3K" como "381r3K".
-- **Que item é**: pelo ícone, comparado com os ícones oficiais dos itens do mercado. Só aceita um item com diferença ≤ 15 e margem ≥ 5 sobre o segundo candidato. O resto fica "fora do mercado", que é onde caem os itens vinculados.
-- **Só 2560×1440 por agora.** As medidas (casas de 65 px a cada 71,25 × 74, algarismos de 10 px) são dessa resolução. Noutra resolução, a app diz que não encontrou a mochila.
-- A última foto lida fica em `%APPDATA%\aion-helper\ultima-mochila.png`, para se perceber uma leitura que saia mal.
+## Price and note under the item tooltip
 
-## Preço e nota por baixo do cartão do item
+**Automatic** (on by default; *automático* switch on the tab bar): whenever the game opens an item tooltip, a strip appears under it with the price (average sold, 72 h reference or cheapest listing, and it says which), what you get after the fee, and your note. When the tooltip closes, the strip goes away. The strip doesn't take clicks.
 
-**Automático** (ligado por omissão; interruptor "automático" na barra das abas): sempre que o jogo abre o cartão de um item, aparece por baixo dele uma faixa com o preço (média vendida, referência de 72 h ou o anúncio mais barato, e diz qual dos três é), o que recebes depois da taxa, e a tua nota, se houver. Quando o cartão fecha, a faixa vai-se. A faixa não apanha cliques.
+- The watcher runs 4 times a second, but only works with **AION2.exe in front**: it copies the game window and looks for the tooltip footer in C# (~60–90 ms). With the game in the background it costs ~10 ms and copies nothing. OCR only runs when a new tooltip appears, and only on that tooltip's column.
+- "No known price" means aion2.exchange doesn't track the item (it tracks ~500), not that the item doesn't sell.
+- **Ctrl+Alt+P** reads by hand when automatic is off; the strip then disappears after 12 s.
+- **Ctrl+Alt+N** opens the app on the Notes tab with the last tooltip read. Notes are stored by name, so they also work for bound items.
+- **Vendor or market**: the strip reads the vendor price on the tooltip footer and compares it with what you'd get on the market after the fee. It only suggests the market if you'd get 10% more or better.
 
-- A vigia corre 4 vezes por segundo, mas só trabalha com o **AION2.exe à frente**: copia a janela do jogo e procura o rodapé dos cartões em C# (~60–90 ms). Com o jogo atrás custa ~10 ms e não copia nada. O OCR só corre quando aparece um cartão novo, e só na coluna desse cartão.
-- "Sem preço conhecido" quer dizer que o aion2.exchange não segue o item (segue ~500), e não que o item não se vende.
-- **Ctrl+Alt+P** continua a existir, para ler à mão quando o automático está desligado. Nesse caso a faixa desaparece ao fim de 12 s.
+## Builds and Daevanion
 
-- **Ctrl+Alt+N** abre a app na aba Notas, com o nome do último cartão lido. As notas guardam-se pelo nome, por isso também funcionam em itens vinculados (que não estão no mercado e não têm preço).
-- **Não toca no jogo.** Escrever dentro do cartão obrigava a mexer nos ficheiros ou na memória do jogo, o que o anti-cheat apanha. Isto é uma janela da app por cima do jogo, como qualquer overlay.
-- O jogo tem de estar em **janela sem bordas**: em ecrã inteiro exclusivo, nenhuma janela fica por cima.
-- O nome lê-se com o OCR do Windows (`src/ocr.ps1`, sempre aberto). O cartão reconhece-se pela linha da raridade ("Raro Botas", "Comum Pergaminho") logo abaixo do nome. O fundo do cartão, que é onde a faixa se cola, acha-se pela cor do rodapé (24, 27, 34) e não pelo texto, porque por baixo do cartão há nomes de jogadores.
+- **Skills come from NCSoft.** There's no official skill catalog, but any character's sheet lists the whole class (including skills not learned yet: 12 active, 13 stigma and 10 passive for every class, as of 10 Oct 2026). The app reads one character of each class and caches the list for 7 days.
+- **Skill bar**: drag from the palette or double-click to add; right-click, double-click or drag off to remove; drag between slots to swap. Passives don't go on the bar.
+- **Level and specializations (◆)** in the right panel. The limits (level 30, 5 ◆) aren't confirmed in game; they're generous on purpose.
+- **From my character** (*Do meu personagem*): reads skill levels, equipped stigmas and the Daevanion from the official sheet. The sheet doesn't include specializations or the bar layout.
+- **Share** copies an `AH1:…` code (~300 characters); **Paste code** (*Colar código*) opens it in another copy of the app. The code only carries ids, so names show in the reader's game language.
+- **Daevanion**: the 5 boards of the class. A node opens when it's next to an open one, like in game; closing a node also closes the ones left disconnected from the start. The side panel sums stats and skill levels across all boards. Node point costs aren't in the official data, so the app doesn't show them.
 
-## Builds de habilidades
+## Items index
 
-Aba **Builds**: planear as habilidades de uma classe, como no QuestLog.
+The Global site has no item list. Taiwan's official dictionary has ~11,000 items with the same ids, but Taiwan is ahead: on 10 Oct 2026, 8,139 of 11,051 existed in Global (74%). `scripts/gerar-itens.js` walks the Taiwan dictionary category by category (50 per page, max 10,000 per search), fetches each item's Global sheet in pt-BR and en-US (~1 h, resumes where it stopped) and keeps only the ones Global knows. Some names repeat on purpose: the game has a bound and a tradable version of the same item, with different ids. Re-run it after big game updates.
 
-- **As habilidades vêm da NC.** Não há catálogo oficial, mas a ficha de qualquer personagem traz a lista inteira da classe (também as que ainda não aprendeu: 12 ativas, 13 estigmas e 10 passivas em todas as classes, a 10 Out 2026). A app procura um personagem da classe, lê-lhe a ficha e guarda o catálogo 7 dias. Nomes no idioma do jogo, ícones oficiais.
-- **Barra de 4×12**: arrasta da paleta ou faz duplo clique para pôr; botão direito, duplo clique ou arrastar para fora para tirar; de casa para casa trocam. As passivas não vão para a barra.
-- **Nível e especializações (◆)** no painel da direita. Os limites (nível 30, 5 ◆) não estão confirmados no jogo: são folgados de propósito.
-- **Prioridade** (ativas, estigmas, passivas) e **macros** em texto, mais notas livres.
-- **Do meu personagem**: procura o nome na região escolhida e lê da ficha oficial o nível de cada habilidade e os estigmas equipados. A ficha não diz as especializações nem a barra.
-- **Partilhar** copia um código `AH1:…` (cerca de 300 caracteres); **Colar código** abre-o noutra app. O código só leva ids, por isso abre com os nomes no idioma de quem o cola.
-- Guardadas em `%APPDATA%aion-helperuilds.json`.
+## Other settings
 
-## Itens
+- **Game language** (*Idioma do jogo*): Portuguese, English, German, Spanish, French or Japanese. Changes item names and the OCR language. If Windows lacks that OCR language, the app warns you (Japanese needs the language pack).
+- **Fallback servers** (*Servidores de reserva*): when your server has no listing for an item, the app uses another server's price and says which. With nothing ticked, it uses the largest server in your region and faction.
+- **Save diagnostics** (*Guardar diagnóstico*): puts the latest captures, what the app read and the errors in a folder, to send to whoever is helping you.
 
-Aba **Itens**: todos os itens que existem no Global, procurados pelo nome (português ou inglês) ou pelo número, com filtros de categoria, raridade, classe e "só transacionáveis". O detalhe (atributos, pedras, onde se obtém, aparência) vem da ficha oficial, no encantamento escolhido. Se o item estiver no mercado do servidor escolhido em Preços, mostra também o preço.
+## Development
 
-- O Global não tem lista de itens. Taiwan tem um dicionário com ~11 000; os números são os mesmos, mas Taiwan vai à frente: a 10 Out 2026 existiam no Global 8 139 de 11 051 (74%). `scripts/gerar-itens.js` percorre o dicionário de Taiwan categoria a categoria (50 por página, máximo 10 000 por pesquisa), pede a ficha global de cada um em pt-BR e en-US (~1 h, retoma onde parou) e guarda só os que o Global conhece.
-- Há nomes repetidos de propósito: o jogo tem a versão vinculada e a transacionável do mesmo item, com números diferentes.
-- Correr outra vez depois de cada atualização grande do jogo.
-
-## Personagem
-
-Aba **Personagem**: procurar alguém pelo nome (numa das 5 regiões do Global) e ver a ficha oficial: poder de combate, nível de item, atributos, equipamento (clica numa peça para ver atributos, encantamento e pedras), asas, mascote, títulos, habilidades e os tabuleiros Daevanion com a soma do que dão. **Criar build com isto** faz uma build com a classe, os níveis das habilidades, os estigmas equipados e o Daevanion.
-
-## Daevanion
-
-Dentro de cada build, sub-aba **Daevanion**: os 5 tabuleiros da classe (tirados da ficha de um personagem dessa classe, guardados 7 dias). Abre-se um nó clicando nele quando está junto de um aberto, como no jogo; fechar um nó fecha também os que ficavam desligados do início. Ao lado, a soma dos atributos e dos níveis de habilidade de todos os tabuleiros. "Do meu personagem" também lê o Daevanion.
-
-## Outras coisas que a app faz
-
-- **Loja ou mercado.** A faixa lê o preço que a loja paga (o número no canto do rodapé do cartão, "92" ou "10(680)" numa pilha) e compara-o com o que recebes no mercado depois da taxa. Só aconselha o mercado se ganhares 10% ou mais. Os preços da loja ficam guardados por nome, e a Mochila usa-os na coluna Loja.
-- **Kinah.** A moeda prateada da mochila conta-se à parte. É a mesma moeda que aparece ao lado do preço da loja.
-- **Alertas de preço.** No detalhe de um item: "avisa-me quando estiver a X ou menos neste servidor". A app verifica de 15 em 15 minutos e mostra uma notificação do Windows, uma vez por descida.
-- **Idioma do jogo** (Definições): português, inglês, alemão, espanhol, francês ou japonês. Muda os nomes e o idioma do OCR. Se o Windows não tiver o OCR desse idioma, a app avisa (o japonês precisa do pacote de idioma).
-- **Servidores de reserva** (Definições): quando o teu servidor não tem anúncios de um item, a app usa o preço de outro servidor e diz qual. Sem nada marcado, usa o maior da tua região e fação.
-- **Guardar diagnóstico** (Definições): junta numa pasta as últimas capturas, o que a app leu e os erros, para mandares a quem te está a ajudar.
-
-## Resoluções
-
-Tudo foi medido a **2560×1440**. Noutras resoluções a app leva a imagem à escala de 1440p antes de ler a mochila, e mede os cartões pela largura do rodapé. Só foi testado com versões sintéticas das capturas: a 4K acerta 35 de 35 quantidades, a 1600p 32, a 1200p 33 e a 1080p 27. Nenhum item foi mal identificado. A Mochila marca a leitura como "resolução experimental". Para afinar, falta uma captura verdadeira a 1080p.
-
-## Testes
+Double-click `Aion Helper.bat` to run from source. `npm run dist` builds the portable `.exe` into `dist/`.
 
 ```
-npm test           # contas, fontes, quantidades e mochila nas capturas reais (e em resoluções sintéticas), cartões, vigia, alertas, o olho em C#, âmbito dos scripts
-npm run selftest   # contra os dados reais (precisa de rede)
+npm test           # pricing, sources, quantities and inventory on real captures (and synthetic resolutions), tooltips, watcher, alerts, the C# eye, builds and Daevanion rules, script scope
+npm run selftest   # against the live data (needs network)
 ```
 
-Captura para verificar a interface sem ninguém a olhar:
-`AION_CAPTURA=c:\caminho\cap.png` antes de arrancar o Electron. A app abre, clica no item com mais anúncios, guarda a imagem e fecha. Com `AION_MOCHILA=c:\caminho\captura.png` também definido, abre a aba Mochila e lê essa imagem.
+UI check without anyone watching: set `AION_CAPTURA=c:\path\cap.png` before starting Electron. The app opens, clicks the item with most listings, saves a screenshot and quits. With `AION_ABA=<tab>` it opens that tab instead; `AION_JS=script.js` runs a script in the page first; `AION_MOCHILA=c:\path\capture.png` reads that image on the Inventory tab.
 
-## Licença
+## License
 
-Código à vista, não código aberto (ver `LICENSE`). Podes usar a app, partilhar o instalador oficial sem alterações, ler o código e mandar contribuições. Não podes distribuir versões modificadas, tirar a autoria ou os créditos, nem vender a app.
+Source-available, not open source (see `LICENSE`). You may use the app, share the official executable unmodified, read the code and send contributions. You may not distribute modified versions, remove the author credit or the data-source credits, or sell the app.
 
-O instalador é selado com as *fuses* do Electron. Uma cópia com o `app.asar` mexido (por exemplo, com outro nome no lugar de "by LusitanoScripts") recusa arrancar: "Integrity check failed for asar archive". O `scripts/test-autoria.js` falha se a autoria, os créditos ou a selagem desaparecerem.
+The executable is sealed with Electron *fuses*. A copy with a tampered `app.asar` (for example, another name in place of "by LusitanoScripts") refuses to start: "Integrity check failed for asar archive". `scripts/test-autoria.js` fails if the credits or the seal go missing.
 
-As capturas em `scripts/amostras/` são do jogo, com tudo o que não são cartões nem a mochila tapado a preto (havia nomes de outros jogadores).
+The captures in `scripts/amostras/` are from the game, with everything that isn't a tooltip or the inventory blacked out (they had other players' names).
 
 ---
-App de fãs. Sem ligação à NCSoft.
+Fan-made app. Not affiliated with NCSoft. Aion and AION 2 are trademarks of NCSoft.
