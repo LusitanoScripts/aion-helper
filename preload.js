@@ -1,0 +1,62 @@
+'use strict';
+
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('api', {
+  minimizar: () => ipcRenderer.invoke('win:minimize'),
+  fechar: () => ipcRenderer.invoke('win:close'),
+  fixar: (on) => ipcRenderer.invoke('win:pin', on),
+  abrirLink: (url) => ipcRenderer.invoke('link:abrir', url),
+
+  definicoes: () => ipcRenderer.invoke('defs:todas'),
+  mudarDefinicoes: (alt) => ipcRenderer.invoke('defs:mudar', alt),
+
+  servidores: () => ipcRenderer.invoke('dados:servidores'),
+  itens: (servidor, forcar) => ipcRenderer.invoke('dados:itens', { servidor, forcar }),
+  item: (id, servidor) => ipcRenderer.invoke('dados:item', { id, servidor }),
+  aoChegaremNomes: (cb) => ipcRenderer.on('nomes:lote', (_e, d) => cb(d)),
+
+  lerMochila: (servidor) => ipcRenderer.invoke('mochila:ler', { servidor }),
+  abrirImagemMochila: (servidor) => ipcRenderer.invoke('mochila:abrir', { servidor }),
+  mochilaTeste: (servidor) => ipcRenderer.invoke('mochila:teste', { servidor }),
+  aoProgressoMochila: (cb) => ipcRenderer.on('mochila:progresso', (_e, d) => cb(d)),
+
+  notas: () => ipcRenderer.invoke('notas:todas'),
+  escreverNota: (nome, texto) => ipcRenderer.invoke('notas:escrever', { nome, texto }),
+  aoEditarNota: (cb) => ipcRenderer.on('notas:editar', (_e, d) => cb(d)),
+  lerCartoes: () => ipcRenderer.invoke('cartoes:ler'),
+  cartoesAuto: (on) => ipcRenderer.invoke('cartoes:auto', on),
+  reservas: () => ipcRenderer.invoke('reservas:estado'),
+  guardarDiagnostico: () => ipcRenderer.invoke('diagnostico:guardar'),
+  alertas: () => ipcRenderer.invoke('alertas:todos'),
+  idioma: () => ipcRenderer.invoke('idioma:estado'),
+  mudarIdioma: (i) => ipcRenderer.invoke('idioma:mudar', i),
+  definirAlerta: (a) => ipcRenderer.invoke('alertas:definir', a),
+  apagarAlerta: (itemId, servidor) => ipcRenderer.invoke('alertas:apagar', { itemId, servidor }),
+  aoMudaremAlertas: (cb) => ipcRenderer.on('alertas:mudaram', (_e, d) => cb(d)),
+  medirReservas: () => ipcRenderer.invoke('reservas:medir'),
+  mudarReservas: (ids) => ipcRenderer.invoke('reservas:mudar', ids),
+  aoProgressoReservas: (cb) => ipcRenderer.on('reservas:progresso', (_e, d) => cb(d)),
+  aoLerCartoes: (cb) => ipcRenderer.on('cartoes:lidos', (_e, d) => cb(d)),
+  atalhos: () => ipcRenderer.invoke('atalhos:estado'),
+  builds: () => ipcRenderer.invoke('builds:todas'),
+  novaBuild: (classe) => ipcRenderer.invoke('builds:nova', classe),
+  guardarBuild: (b) => ipcRenderer.invoke('builds:guardar', b),
+  apagarBuild: (id) => ipcRenderer.invoke('builds:apagar', id),
+  exportarBuild: (b) => ipcRenderer.invoke('builds:exportar', b),
+  importarBuild: (codigo) => ipcRenderer.invoke('builds:importar', codigo),
+  limitesBuilds: () => ipcRenderer.invoke('builds:limites'),
+  classes: () => ipcRenderer.invoke('builds:classes'),
+  habilidades: (classe) => ipcRenderer.invoke('builds:habilidades', classe),
+  procurarPersonagem: (nome, regiao) => ipcRenderer.invoke('builds:procurarPersonagem', { nome, regiao }),
+  habilidadesDoPersonagem: (p) => ipcRenderer.invoke('builds:doPersonagem', p),
+  fichaPersonagem: (ref) => ipcRenderer.invoke('pers:ficha', ref),
+  itemEquipado: (ref, item) => ipcRenderer.invoke('pers:item', { ref, item }),
+  tabuleiroPersonagem: (ref, id) => ipcRenderer.invoke('pers:tabuleiro', { ref, id }),
+  tabuleiros: (classe) => ipcRenderer.invoke('dv:tabuleiros', classe),
+  indiceItens: () => ipcRenderer.invoke('itens:indice'),
+  fichaItem: (id, encantamento) => ipcRenderer.invoke('itens:ficha', { id, encantamento }),
+  escreverClipboard: (t) => ipcRenderer.invoke('clip:escrever', t),
+  // Só a janela das faixas usa isto.
+  aoMostrarFaixas: (cb) => ipcRenderer.on('faixas:mostrar', (_e, d) => cb(d)),
+});

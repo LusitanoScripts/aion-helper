@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+  <title>Aion Helper · faixa</title>
+  <link rel="stylesheet" href="css/faixa.css" />
+</head>
+<body>
+  <!--
+    Uma janela transparente do tamanho do ecrã, por cima do jogo, que não apanha
+    o rato: os cliques passam para o jogo. Cada faixa é posta por baixo do cartão
+    que o jogo abriu, em coordenadas da janela.
+  -->
+  <div id="faixas"></div>
+  <script src="../src/pricing.js"></script>
+  <script src="js/faixa-ui.js"></script>
+</body>
+</html>

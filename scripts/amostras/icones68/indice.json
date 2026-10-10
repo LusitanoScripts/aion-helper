@@ -1,0 +1,150 @@
+[
+ {
+  "ficheiro": "Icon_Item_Usable_Potion_hp_once_03_001.png",
+  "itens": [
+   {
+    "id": 510116011,
+    "nome": "Cristal de Vida"
+   }
+  ]
+ },
+ {
+  "ficheiro": "Icon_Item_Usable_Potion_HP_Dot_A_002.png",
+  "itens": [
+   {
+    "id": 510126002,
+    "nome": "Poção de Vida Superior"
+   }
+  ]
+ },
+ {
+  "ficheiro": "Icon_Item_Usable_Food_A_003.png",
+  "itens": [
+   {
+    "id": 510716005,
+    "nome": "Carne Frita com Kukuru"
+   },
+   {
+    "id": 510716011,
+    "nome": "Carne Frita com Kukuru do Perito"
+   }
+  ]
+ },
+ {
+  "ficheiro": "Icon_Item_Usable_Scroll_ProtectShield_02a_A_002.png",
+  "itens": [
+   {
+    "id": 511060025,
+    "nome": "Pergaminho de Resistência a Alteração de Estado"
+   }
+  ]
+ },
+ {
+  "ficheiro": "Icon_Item_Gather_Od_L_lv2_02a.png",
+  "itens": [
+   {
+    "id": 610610013,
+    "nome": "Od"
+   }
+  ]
+ },
+ {
+  "ficheiro": "Icon_Usable_MagicStone_a_001.png",
+  "itens": [
+   {
+    "id": 511360001,
+    "nome": "Pedra de Mana Inferior"
+   }
+  ]
+ },
+ {
+  "ficheiro": "Icon_Item_Usable_Enchant_SoulStone_A_c_002.png",
+  "itens": [
+   {
+    "id": 513560003,
+    "nome": "Pedra Vital Intermediária"
+   }
+  ]
+ },
+ {
+  "ficheiro": "Icon_Item_Usable_Potion_Cure_A_002.png",
+  "itens": [
+   {
+    "id": 510146002,
+    "nome": "Poção de Cura Superior"
+   }
+  ]
+ },
+ {
+  "ficheiro": "Icon_Item_Usable_Potion_HP_Instant_A_002.png",
+  "itens": [
+   {
+    "id": 510116006,
+    "nome": "Elixir de Vida Superior"
+   }
+  ]
+ },
+ {
+  "ficheiro": "Icon_Item_Usable_Potion_MP_Dot_A_001.png",
+  "itens": [
+   {
+    "id": 510126003,
+    "nome": "Poção de Mana"
+   }
+  ]
+ },
+ {
+  "ficheiro": "Icon_GM_0022_T05_Cape.png",
+  "itens": [
+   {
+    "id": 210740004,
+    "nome": "Capa da Ilusão"
+   }
+  ]
+ },
+ {
+  "ficheiro": "Icon_Equip_AR_L_0021_T03_Boots.png",
+  "itens": [
+   {
+    "id": 210640072,
+    "nome": "Botas de Ansas"
+   }
+  ]
+ },
+ {
+  "ficheiro": "Icon_Equip_WP_L_GS_0007_T03.png",
+  "itens": [
+   {
+    "id": 110160017,
+    "nome": "Montante Esquecido"
+   }
+  ]
+ },
+ {
+  "ficheiro": "Icon_Item_Usable_Scroll_MaxHPMPRatio_A_002.png",
+  "itens": [
+   {
+    "id": 511060028,
+    "nome": "Pergaminho de Bendição Superior"
+   }
+  ]
+ },
+ {
+  "ficheiro": "Icon_WingF_003.png",
+  "itens": [
+   {
+    "id": 512400023,
+    "nome": "Asas de Borboleta Azul"
+   }
+  ]
+ },
+ {
+  "ficheiro": "Icon_WP_GS_0066_T04.png",
+  "itens": [
+   {
+    "id": 110150005,
+    "nome": "Montante do Meteoro"
+   }
+  ]
+ }
+]

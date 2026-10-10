@@ -1,0 +1,63 @@
+/* ── Aion Helper · faixa por baixo do cartão do jogo ────────────────────── */
+
+:root {
+  --gold: #e3b765;
+  --txt: #dde4ee;
+  --dim: #8f9bb0;
+  --green: #4fd182;
+  --amber: #f0b53f;
+  --mono: "Cascadia Mono", "JetBrains Mono", Consolas, monospace;
+  --sans: "Segoe UI", Inter, system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  font-family: var(--sans);
+  color: var(--txt);
+  user-select: none;
+}
+
+/* A cor de fundo é a do rodapé do próprio cartão (24,27,34): a faixa lê-se
+   como uma continuação dele, e o dourado à esquerda diz que é da app. */
+.faixa {
+  position: fixed;
+  /* Nunca a cor exata do rodapé (24,27,34): a vigia procura essa cor e via a
+     própria faixa como um cartão. 30,34,44 fica fora da tolerância (±4). */
+  background: rgb(30, 34, 44);
+  border: 1px solid rgba(73, 81, 88, 0.9);
+  border-top: 0;
+  border-left: 3px solid var(--gold);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.5);
+  padding: 9px 16px 10px;
+  font-size: 16px;
+  line-height: 1.35;
+  animation: entra 120ms ease-out;
+}
+@keyframes entra { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+.linha { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.preco { font-family: var(--mono); font-weight: 700; font-size: 21px; color: var(--gold); }
+.rotulo { font-size: 12px; text-transform: uppercase; letter-spacing: .8px; color: var(--dim); }
+.dim { color: var(--dim); font-size: 14px; }
+.aviso { color: var(--amber); font-size: 14px; }
+.fora { color: var(--dim); font-size: 15px; font-style: italic; }
+.nota {
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px dashed rgba(143, 155, 176, .3);
+  color: #f3e3bd;
+  white-space: pre-wrap;
+}
+.nota::before { content: "✎ "; color: var(--gold); }
+.atalho { margin-top: 5px; font-size: 12px; color: #6a7488; }
+.venda { margin-top: 4px; font-size: 14px; }
+.venda::before { margin-right: 6px; }
+.v-mercado { color: #4fd182; }
+.v-mercado::before { content: "▲"; }
+.v-loja { color: #8fc0ff; }
+.v-loja::before { content: "●"; }

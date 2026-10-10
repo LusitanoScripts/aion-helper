@@ -1,0 +1,4 @@
+node_modules/
+dist/
+*.part
+scripts/.itens-progresso.json*

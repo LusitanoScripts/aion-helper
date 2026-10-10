@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <!--
+    img-src: assets.playnccdn.com é onde a NC guarda os ícones dos itens (o campo
+    `icon` da ficha oficial). Uma origem que falte aqui é um ícone que não aparece
+    e não dá erro nenhum — se aparecer outra, acrescentar aqui. profileimg.plaync.com
+    são os retratos dos personagens (aba Personagem), que redirecionam para
+    fizz-download.playnccdn.com.
+  -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; img-src 'self' https://assets.playnccdn.com https://profileimg.plaync.com https://fizz-download.playnccdn.com data:; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+  <title>Aion Helper</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <header id="titlebar">
+    <div class="tb-drag">
+      <span class="tb-logo">A2</span>
+      <span class="tb-title">AION HELPER</span>
+      <span class="tb-autor">by LusitanoScripts</span>
+      <span class="tb-fresh" id="frescura"></span>
+    </div>
+    <div class="tb-actions">
+      <button id="btnAtualizar" class="tb-btn" title="Atualizar preços (F5)">⟳</button>
+      <button id="btnFixar" class="tb-btn pin" title="Manter sempre por cima">📌</button>
+      <button id="btnMin" class="tb-btn" title="Minimizar">─</button>
+      <button id="btnFechar" class="tb-btn danger" title="Fechar">✕</button>
+    </div>
+  </header>
+
+  <nav id="abas">
+    <button data-aba="precos" class="on">Preços</button>
+    <button data-aba="mochila">Mochila</button>
+    <button data-aba="itens">Itens</button>
+    <button data-aba="personagem">Personagem</button>
+    <button data-aba="builds">Builds</button>
+    <button data-aba="notas">Notas</button>
+    <button data-aba="definicoes">Definições</button>
+    <label class="chk auto" title="Mostrar o preço e a nota por baixo do cartão do item sempre que ele abre no jogo, sem atalho"><input id="cartoesAuto" type="checkbox" /> automático</label>
+    <span id="cartoesEstado" class="abas-estado" title="Passa o rato por um item no jogo e carrega em Ctrl+Alt+P">Ctrl+Alt+P no jogo: preço e nota por baixo do cartão do item</span>
+  </nav>
+
+  <main id="precos" class="aba">
+    <div class="barra">
+      <label class="campo">
+        <span>Servidor</span>
+        <select id="servidor"></select>
+      </label>
+      <label class="campo cresce">
+        <span>Procurar</span>
+        <input id="procura" type="search" placeholder="nome em português ou inglês, ou o número do item" autocomplete="off" />
+      </label>
+      <label class="campo">
+        <span>Secção</span>
+        <select id="seccao"><option value="">Todas</option></select>
+      </label>
+      <label class="chk" title="Esconde os itens cujo anúncio mais barato tem razões para desconfiar">
+        <input id="soCredivel" type="checkbox" /> só preços credíveis
+      </label>
+    </div>
+
+    <div id="estado" class="estado"></div>
+
+    <div class="corpo">
+      <div class="tabela-wrap">
+        <table id="tabela">
+          <thead>
+            <tr>
+              <th class="ico"></th>
+              <th data-ord="nome">Item</th>
+              <th data-ord="valor" class="num" title="Preço médio vendido onde existe; senão, o anúncio mais barato">Valor</th>
+              <th data-ord="liquido" class="num" title="O que recebes ao vender, depois da taxa de 8% do mercado">Recebes</th>
+              <th data-ord="anuncios" class="num" title="Anúncios à venda neste momento">Anúncios</th>
+              <th data-ord="variacao" class="num" title="Variação do anúncio mais barato nas últimas 24 h">24 h</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <aside id="detalhe" class="detalhe vazio">
+        <p class="dica">Escolhe um item para ver o histórico e o preço de referência.</p>
+      </aside>
+    </div>
+  </main>
+
+  <main id="mochila" class="aba" hidden>
+    <div class="barra">
+      <button id="btnLerMochila" class="primario" title="A app esconde-se, tira uma foto do ecrã e volta">Ler a mochila</button>
+      <button id="btnAbrirImagem" title="Ler uma captura do ecrã já guardada (PNG)">Abrir imagem…</button>
+      <span class="dica-barra">Abre o <b>Cubo</b> no jogo e carrega no botão. Os preços são do servidor escolhido em Preços.</span>
+    </div>
+    <div id="mochilaEstado" class="estado"></div>
+    <div id="mochilaCorpo" class="mochila-corpo">
+      <div class="vazio-grande">
+        <p>Ainda não leste a mochila.</p>
+        <p class="dim">Funciona com o jogo a 2560×1440. Lê as quantidades e reconhece pelo ícone os itens que estão à venda no mercado; os outros (vinculados, por exemplo) aparecem como “fora do mercado”.</p>
+      </div>
+    </div>
+  </main>
+
+  <main id="notas" class="aba" hidden>
+    <div class="notas-corpo">
+      <section class="editor">
+        <div id="notaEscolha" class="dim"></div>
+        <label class="campo">
+          <span>Item</span>
+          <input id="notaNome" type="text" placeholder="nome do item, como aparece no cartão" autocomplete="off" />
+        </label>
+        <label class="campo">
+          <span>Nota</span>
+          <textarea id="notaTexto" rows="4" placeholder="ex.: guardar para o Perseguidor · não vender abaixo de 50K"></textarea>
+        </label>
+        <div class="botoes">
+          <button id="btnGuardarNota" class="primario">Guardar</button>
+          <button id="btnApagarNota">Apagar</button>
+          <span id="notaGuardada" class="dim"></span>
+          <span class="dim">Ctrl+Enter guarda</span>
+        </div>
+      </section>
+      <h3>Todas as notas</h3>
+      <div id="notasLista"></div>
+    </div>
+  </main>
+
+  <main id="itens" class="aba" hidden>
+    <div class="barra">
+      <label class="campo cresce"><span>Procurar</span><input id="itProcura" type="search" placeholder="nome do item (português ou inglês) ou o número" autocomplete="off" /></label>
+      <label class="campo"><span>Categoria</span><select id="itCat"><option value="">Todas</option></select></label>
+      <label class="campo"><span>Raridade</span><select id="itGrau"><option value="">Todas</option></select></label>
+      <label class="campo"><span>Classe</span><select id="itClasse"><option value="">Todas</option></select></label>
+      <label class="chk"><input id="itTransacionavel" type="checkbox" /> só transacionáveis</label>
+    </div>
+    <div id="itEstado" class="estado"></div>
+    <div class="corpo">
+      <div class="tabela-wrap" id="itLista"></div>
+      <aside id="itDetalhe" class="detalhe vazio"><p class="dica">Escolhe um item para ver os atributos.</p></aside>
+    </div>
+  </main>
+
+  <main id="personagem" class="aba" hidden>
+    <div class="barra">
+      <label class="campo cresce"><span>Nome do personagem</span><input id="peNome" type="search" maxlength="40" placeholder="o teu ou o de outra pessoa" /></label>
+      <label class="campo"><span>Região</span><select id="peRegiao"></select></label>
+      <button id="peProcurar" class="primario">Procurar</button>
+    </div>
+    <div id="peResultados" class="pe-resultados"></div>
+    <div id="peEstado" class="estado"></div>
+    <div class="corpo">
+      <div id="peFicha" class="pe-ficha">
+        <div class="vazio-grande">
+          <p>Procura um personagem pelo nome.</p>
+          <p class="dim">A ficha vem do site oficial da NC: equipamento com atributos e pedras, habilidades, Daevanion, títulos, asas e mascote. Dá para a transformar numa build.</p>
+        </div>
+      </div>
+      <aside id="peDetalhe" class="detalhe vazio"><p class="dica">Clica numa peça de equipamento para a ver.</p></aside>
+    </div>
+  </main>
+
+  <main id="builds" class="aba" hidden>
+    <aside class="bl-lista">
+      <div class="bl-cab">Builds <span id="blConta" class="dim"></span></div>
+      <div id="blLista"></div>
+      <div class="bl-botoes">
+        <button id="btnNovaBuild" class="primario">+ Nova build</button>
+        <button id="btnColarBuild" title="Colar o código de uma build que alguém partilhou">Colar código</button>
+      </div>
+    </aside>
+
+    <section class="bl-centro" id="blCentro">
+      <div class="vazio-grande" id="blVazio">
+        <p>Ainda não tens builds.</p>
+        <p class="dim">Cria uma, escolhe a classe e arrasta as habilidades para a barra. As habilidades, os nomes e os ícones vêm do site oficial da NC.</p>
+      </div>
+
+      <div id="blEditor" hidden>
+        <div class="barra bl-topo">
+          <label class="campo cresce"><span>Nome</span><input id="blNome" type="text" maxlength="80" /></label>
+          <label class="campo"><span>Classe</span><select id="blClasse"></select></label>
+          <label class="campo"><span>Para</span><input id="blEtiqueta" type="text" maxlength="30" placeholder="PvE, PvP, Abismo…" list="blEtiquetas" /></label>
+          <datalist id="blEtiquetas"><option value="PvE"><option value="PvP"><option value="Abismo"><option value="Masmorras"><option value="Farm"></datalist>
+          <div class="bl-acoes">
+            <button id="btnImportarPersonagem" title="Ler os níveis das habilidades de um personagem, pela ficha oficial">Do meu personagem…</button>
+            <button id="btnPartilhar" title="Copiar um código que outra pessoa cola na app dela">Partilhar</button>
+            <button id="btnDuplicar">Duplicar</button>
+            <button id="btnApagarBuild" class="perigo">Apagar</button>
+          </div>
+        </div>
+        <div id="blEstado" class="estado"></div>
+
+        <div id="blPersonagem" class="bl-personagem" hidden>
+          <div class="barra">
+            <label class="campo cresce"><span>Nome do personagem</span><input id="blPNome" type="search" maxlength="40" /></label>
+            <label class="campo"><span>Região</span><select id="blPRegiao"></select></label>
+            <button id="btnPProcurar" class="primario">Procurar</button>
+            <button id="btnPFechar">Fechar</button>
+          </div>
+          <div id="blPResultados"></div>
+        </div>
+
+        <nav class="bl-sub" id="blSub">
+          <button data-sub="hab" class="on">Habilidades</button>
+          <button data-sub="dv">Daevanion</button>
+        </nav>
+
+        <div id="blSubHab">
+        <div class="bl-paleta" id="blPaleta"></div>
+
+        <h3 class="bl-h">Barra de atalhos <small class="dim">arrasta ou faz duplo clique para pôr · botão direito, duplo clique ou arrastar para fora para tirar</small></h3>
+        <div class="bl-barra" id="blBarra"></div>
+
+        <h3 class="bl-h">Prioridade <small class="dim">arrasta uma habilidade para a linha dela · botão direito tira · arrasta para mudar a ordem</small></h3>
+        <div id="blPrioridade" class="bl-prioridade"></div>
+
+        <h3 class="bl-h">Macros <button id="btnNovaMacro" class="mini">+ macro</button></h3>
+        <div id="blMacros"></div>
+
+        <h3 class="bl-h">Notas</h3>
+        <textarea id="blNotas" rows="4" maxlength="4000" placeholder="rotação, quando usar cada estigma, equipamento…"></textarea>
+        </div>
+
+        <div id="blSubDv" hidden>
+          <div class="dv-abas" id="dvAbas"></div>
+          <div class="dv-corpo">
+            <div id="dvGrelha" class="dv-grelha-wrap"><p class="dim pad">A ler os tabuleiros no site da NC…</p></div>
+            <div class="dv-lado">
+              <div class="dv-legenda">
+                <span><i class="dv-no aberto g-common"></i> aberto</span>
+                <span><i class="dv-no pode g-common"></i> pode abrir</span>
+                <span><i class="dv-no fechado g-common"></i> fechado</span>
+                <span><i class="dv-no aberto t-SkillLevel g-legend"></i> nível de habilidade</span>
+              </div>
+              <p class="dim">Clica num nó junto de um aberto para o abrir. Fechar um nó fecha também os que ficavam desligados do início.</p>
+              <div class="bl-botoes-linha"><button id="dvLimpar">Limpar este tabuleiro</button></div>
+              <div id="dvResumo"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="bl-painel" id="blPainel">
+      <p class="dica">Escolhe uma habilidade para lhe dar o nível e as especializações.</p>
+    </aside>
+  </main>
+
+  <main id="definicoes" class="aba" hidden>
+    <div class="defs-corpo">
+      <h3>Idioma do jogo</h3>
+      <p class="dim">O idioma em que tens o Aion 2. A app reconhece os cartões dos itens pelo nome, por isso tem de ser o mesmo.</p>
+      <div class="barra-defs">
+        <select id="idiomaJogo"></select>
+        <span id="idiomaEstado" class="dim"></span>
+      </div>
+
+      <h3 class="sec">Servidores de reserva</h3>
+      <p class="dim">Quando o teu servidor não tem anúncios de um item, a app mostra o preço de um destes, e diz sempre de qual. Os servidores novos têm o mercado quase vazio; os mais antigos têm centenas de itens. Os preços mudam muito de servidor para servidor e entre fações: usa-os como ordem de grandeza.</p>
+      <p id="reservasModo"></p>
+      <div class="barra-defs">
+        <button id="btnMedir">Medir os mercados outra vez</button>
+        <span id="reservasEstado" class="dim"></span>
+      </div>
+      <div id="reservasLista"></div>
+
+      <h3 class="sec">Alertas de preço</h3>
+      <p class="dim">Criam-se no detalhe de um item, na aba Preços.</p>
+      <div id="alertasLista"></div>
+
+      <h3 class="sec">Sobre</h3>
+      <div class="sobre">
+        <p><b>Aion Helper</b> · app de fãs feita por LusitanoScripts. <b>Sem ligação à NCSoft</b>; Aion e AION 2 são marcas da NCSoft.</p>
+        <p><b>Não toca no jogo.</b> Não lê a memória, não intercepta a rede, não altera ficheiros e não carrega em teclas por ti. Só vê o ecrã, como um programa de capturas, e mostra uma janela por cima. Mesmo assim, ferramentas externas usam-se por tua conta.</p>
+        <p><b>Os preços</b> vêm do <a href="#" data-link="https://aion2.exchange/">aion2.exchange</a>, um projeto da comunidade mantido por uma pessoa. A app guarda os dados e só pede de 15 em 15 minutos, para não lhe pesar. <b>Os nomes e os ícones</b>, as habilidades, os tabuleiros Daevanion e as fichas dos personagens vêm do site oficial da NCSoft; a lista de itens vem do dicionário oficial de Taiwan (tw.ncsoft.com), que tem os mesmos números de item. <b>A leitura do ecrã</b> usa o OCR do próprio Windows: nada sai do teu computador além desses pedidos.</p>
+      </div>
+
+      <h3 class="sec">Algo correu mal?</h3>
+      <p class="dim">Guarda numa pasta as últimas capturas, o que a app leu e os erros, e abre-a. Comprime-a e manda-a a quem te está a ajudar. As capturas mostram o ecrã do jogo tal como estava (com o que lá aparecer, nomes incluídos); não leva as tuas notas nem dados da conta.</p>
+      <div class="barra-defs">
+        <button id="btnDiagnostico">Guardar diagnóstico</button>
+        <span id="diagnosticoEstado" class="dim"></span>
+      </div>
+    </div>
+  </main>
+
+  <script src="../src/pricing.js"></script>
+  <script src="../src/daevanion.js"></script>
+  <script src="js/util.js"></script>
+  <script src="js/partilhado-ui.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/mochila.js"></script>
+  <script src="js/notas.js"></script>
+  <script src="js/definicoes.js"></script>
+  <script src="js/builds.js"></script>
+  <script src="js/itens.js"></script>
+  <script src="js/personagem.js"></script>
+</body>
+</html>
