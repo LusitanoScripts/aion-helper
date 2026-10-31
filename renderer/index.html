@@ -37,7 +37,12 @@
     <button data-aba="itens">Itens</button>
     <button data-aba="personagem">Personagem</button>
     <button data-aba="builds">Builds</button>
+    <button data-aba="daevanion">Daevanion</button>
+    <button data-aba="mascotes">Mascotes</button>
+    <button data-aba="temporizadores">Temporizadores</button>
+    <button data-aba="combate">Combate</button>
     <button data-aba="notas">Notas</button>
+    <button data-aba="assistente">Assistente</button>
     <button data-aba="definicoes">Definições</button>
     <label class="chk auto" title="Mostrar o preço e a nota por baixo do cartão do item sempre que ele abre no jogo, sem atalho"><input id="cartoesAuto" type="checkbox" /> automático</label>
     <span id="cartoesEstado" class="abas-estado" title="Passa o rato por um item no jogo e carrega em Ctrl+Alt+P">Ctrl+Alt+P no jogo: preço e nota por baixo do cartão do item</span>
@@ -98,6 +103,128 @@
         <p>Ainda não leste a mochila.</p>
         <p class="dim">Funciona com o jogo a 2560×1440. Lê as quantidades e reconhece pelo ícone os itens que estão à venda no mercado; os outros (vinculados, por exemplo) aparecem como “fora do mercado”.</p>
       </div>
+    </div>
+  </main>
+
+  <main id="daevanion" class="aba" hidden>
+    <aside class="bl-lista">
+      <div class="bl-cab">Planos <span id="dzConta" class="dim"></span></div>
+      <div id="dzLista" class="dz-lista"></div>
+      <div class="bl-botoes"><button id="dzNovo" class="primario">+ Novo plano</button></div>
+    </aside>
+    <section class="bl-centro">
+      <div class="vazio-grande" id="dzVazio">
+        <p>Ainda não tens planos do Daevanion.</p>
+        <p class="dim">Cria um, escolhe a classe e abre os nós como no jogo. Grava quantos quiseres (PvE, PvP, o que já tens…) e volta a eles quando juntares cristais. Os tabuleiros vêm do site oficial da NC.</p>
+      </div>
+      <div id="dzEditor" hidden>
+        <div class="barra bl-topo">
+          <label class="campo cresce"><span>Nome do plano</span><input id="dzNome" type="text" maxlength="80" /></label>
+          <label class="campo"><span>Classe</span><select id="dzClasse"></select></label>
+        </div>
+        <div class="bl-botoes-linha dz-botoes">
+          <button id="dzGravar" class="tz-acertar" title="Grava o plano (Ctrl+S)">Gravado</button>
+          <button id="dzMeu" class="tz-acertar" title="Traz os nós que um personagem (teu ou de outro jogador) tem abertos">Copiar de um personagem…</button>
+          <button id="dzDuplicar" class="tz-acertar">Duplicar</button>
+          <button id="dzApagar" class="tz-acertar">Apagar</button>
+        </div>
+        <div id="dzPers" class="bl-personagem" hidden>
+          <div class="barra">
+            <label class="campo cresce"><span>Nome do personagem</span><input id="dzPNome" type="search" maxlength="40" /></label>
+            <label class="campo"><span>Região</span><select id="dzPRegiao"></select></label>
+            <button id="dzPProcurar" class="primario">Procurar</button>
+          </div>
+          <div id="dzPResultados"></div>
+        </div>
+        <div id="dzEstado" class="estado"></div>
+        <div class="dv-abas" id="dzAbas"></div>
+        <div class="dz-corpo">
+          <div id="dzGrelha" class="dv-grelha-wrap dz-grande"><p class="dim pad">A ler os tabuleiros no site da NC…</p></div>
+          <div class="dz-info">
+            <div id="dzTab" class="dz-tab"></div>
+            <div id="dzNo" class="dz-no-info"></div>
+            <div class="bl-botoes-linha"><button id="dzLimpar" class="tz-acertar">Limpar este tabuleiro</button> <button id="dzLimparTodos" class="tz-acertar">Limpar todos</button></div>
+            <div id="dzResumo"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <main id="mascotes" class="aba" hidden>
+    <div class="barra">
+      <label class="campo"><span>Personagem</span><select id="maPersonagem"></select></label>
+      <button id="maNovoPers" class="tz-acertar" title="Cada personagem tem a sua coleção">+ personagem</button>
+      <label class="campo cresce"><span>Procurar</span><input id="maProcura" type="search" placeholder="nome da mascote (português ou inglês)" autocomplete="off" /></label>
+      <div class="tz-filtros ma-filtro" id="maFiltro">
+        <button class="chip on" data-f="">Todas</button><button class="chip" data-f="falta">Em falta</button><button class="chip" data-f="tem">Obtidas</button><button class="chip" data-f="subir" title="As obtidas que ainda não estão no nível máximo, das que precisam de menos almas para as que precisam de mais">Perto de subir</button>
+      </div>
+      <span id="maConta" class="ma-conta"></span>
+    </div>
+    <div id="maNovo" class="tz-acerto" hidden>
+      <div class="barra-defs">
+        <input id="maNovoNome" maxlength="30" placeholder="nome do personagem" />
+        <button id="maNovoOk">Criar</button>
+        <span class="dim">Cada personagem tem a sua coleção.</span>
+      </div>
+    </div>
+    <div class="ma-jogo">
+      <span class="rotulo-jogo">No jogo</span>
+      <label class="chk" title="Quando escolhes um monstro que é mascote, aparece por baixo do nome dele se já a tens"><input type="checkbox" id="maAlvo" /> avisar no alvo</label>
+      <label class="chk" title="Quando o chat diz que recebeste uma alma, soma-a à mascote deste personagem"><input type="checkbox" id="maAlmas" /> contar almas pelo chat</label>
+      <button id="maLerColecao" class="tz-acertar" title="Liga a leitura: percorre a coleção no jogo e carrega outra vez (ou Ctrl+Alt+M) para parar">Ler a coleção do ecrã</button>
+      <span class="dim" id="maJogoDica">Ctrl+Alt+M liga e desliga a leitura da coleção no jogo</span>
+    </div>
+    <div id="maLidas" class="ma-lidas" hidden></div>
+    <div id="maEstado" class="estado"></div>
+    <div class="ma-lista" id="maLista"></div>
+  </main>
+
+  <main id="combate" class="aba" hidden>
+    <div class="barra">
+      <label class="chk" title="Lê a janela Análise de combate do jogo (Ctrl+X no jogo) e grava cada luta"><input type="checkbox" id="cbLigado" /> medidor ligado</label>
+      <span id="cbFase" class="cb-fase"></span>
+      <label class="campo"><span>Alvo</span><select id="cbAlvo"><option value="">Todos</option></select></label>
+      <button id="cbComparar" class="tz-acertar" disabled title="Marca duas lutas na lista">Comparar 2</button>
+      <span class="dim cb-dica">Abre a Análise de combate no jogo (Ctrl+X) e liga com <b>Ctrl+Alt+D</b>. Só o teu dano: o dos outros do grupo não aparece no ecrã.</span>
+    </div>
+    <div class="corpo">
+      <div class="tabela-wrap">
+        <table class="cb-tabela">
+          <thead><tr><th class="cb-marca"></th><th>Quando</th><th>Alvo</th><th class="num">Duração</th><th class="num">Total</th><th class="num">DPS</th><th>Etiqueta</th></tr></thead>
+          <tbody id="cbLista"></tbody>
+        </table>
+      </div>
+      <aside id="cbDetalhe" class="cb-detalhe"></aside>
+    </div>
+  </main>
+
+  <main id="temporizadores" class="aba" hidden>
+    <div class="barra">
+      <label class="campo"><span>Região do servidor</span><select id="tzRegiao"></select></label>
+      <div class="tz-relogios" id="tzRelogios"></div>
+      <label class="campo"><span>Avisar antes</span><select id="tzAvisoMin">
+        <option value="1">1 min</option><option value="3">3 min</option><option value="5">5 min</option><option value="10">10 min</option><option value="15">15 min</option>
+      </select></label>
+      <button id="tzAcertar" class="tz-acertar" title="Se o jogo mostrar outras horas">Acertar horas…</button>
+    </div>
+    <div id="tzAcerto" class="tz-acerto" hidden>
+      <p class="dim">As horas vêm de sites de fãs que leem os ficheiros do cliente; a NC não as publica. Se o jogo disser outra coisa, acerta aqui. O reset vê-se no jogo, no "recarrega em" das masmorras.</p>
+      <div class="barra-defs">
+        <label class="campo"><span>Eventos e chefes</span><select id="tzAcertoEventos"></select></label>
+        <label class="campo"><span>Resets</span><select id="tzAcertoReset"></select></label>
+      </div>
+    </div>
+    <div class="tz-corpo">
+      <section class="tz-col">
+        <div class="tz-filtros" id="tzFiltros"></div>
+        <div id="tzEventos"></div>
+      </section>
+      <section class="tz-col tz-cargas">
+        <h3>Cargas das masmorras</h3>
+        <p class="dim">Escreve quantas tens agora (o número que o jogo mostra). A app vai somando as que caem e diz quando enche.</p>
+        <div id="tzCargas"></div>
+      </section>
     </div>
   </main>
 
@@ -233,7 +360,7 @@
                 <span><i class="dv-no aberto t-SkillLevel g-legend"></i> nível de habilidade</span>
               </div>
               <p class="dim">Clica num nó junto de um aberto para o abrir. Fechar um nó fecha também os que ficavam desligados do início.</p>
-              <div class="bl-botoes-linha"><button id="dvLimpar">Limpar este tabuleiro</button></div>
+              <div class="bl-botoes-linha"><button id="dvLimpar">Limpar este tabuleiro</button> <button id="dvLimparTodos">Limpar todos</button></div>
               <div id="dvResumo"></div>
             </div>
           </div>
@@ -244,6 +371,30 @@
     <aside class="bl-painel" id="blPainel">
       <p class="dica">Escolhe uma habilidade para lhe dar o nível e as especializações.</p>
     </aside>
+  </main>
+
+  <main id="assistente" class="aba" hidden>
+    <div class="as-corpo">
+      <div id="asSemChave" class="vazio-grande" hidden>
+        <p>O Assistente usa o <b>Gemini</b> da Google, com a tua própria chave (é grátis).</p>
+        <p class="dim">Responde a perguntas sobre o jogo, dá conselhos sobre a mochila e ajuda nas builds — sempre com os dados que a app tem, não de memória.</p>
+        <p><button id="asIrDefs" class="primario">Pôr a chave nas Definições</button></p>
+      </div>
+      <div id="asConversa" class="as-conversa"></div>
+      <div id="asSugestoes" class="as-sugestoes"></div>
+      <form id="asForm" class="as-form">
+        <div class="as-escrever">
+          <div id="asAnexos" class="as-anexos"></div>
+          <textarea id="asPergunta" rows="2" placeholder="Pergunta sobre o jogo, a tua mochila ou uma build… Cola capturas com Ctrl+V. (Enter envia, Shift+Enter muda de linha)"></textarea>
+        </div>
+        <div class="as-botoes">
+          <button id="asEnviar" class="primario" type="submit">Enviar</button>
+          <button id="asLimpar" type="button" title="Começar uma conversa nova">Limpar</button>
+        </div>
+      </form>
+      <label class="as-auto" id="asAutoLinha"><input type="checkbox" id="asAuto" /> <span><b>Dicas automáticas das missões</b> — com o jogo à frente, lê o canto das missões e dá uma dica quando aparece uma missão ou um passo novo (no máximo uma a cada 2 min).</span></label>
+      <p class="dim as-nota">Respostas do Gemini (Google) a partir dos dados da app. Pode enganar-se: confirma no jogo antes de vender ou gastar.</p>
+    </div>
   </main>
 
   <main id="definicoes" class="aba" hidden>
@@ -264,6 +415,37 @@
       </div>
       <div id="reservasLista"></div>
 
+      <h3 class="sec">Assistente (Gemini)</h3>
+      <p class="dim">O Assistente precisa de uma chave do Gemini, que é grátis: entra com a conta Google em <a href="#" data-link="https://aistudio.google.com/app/apikey">aistudio.google.com/app/apikey</a>, carrega em <b>Create API key</b> e cola-a aqui. Fica só neste PC. O plano grátis tem limites por minuto e por dia, e a Google pode usar o que lhe envias para melhorar os modelos — as perguntas, as imagens que colares e os dados que o Assistente lhe passa (mochila, preços, builds, o texto lido do canto das missões).</p>
+      <div class="barra-defs">
+        <input id="geminiChave" type="password" placeholder="cola aqui a chave (AIza…)" autocomplete="off" spellcheck="false" style="min-width:320px" />
+        <button id="geminiGuardar">Guardar e testar</button>
+        <button id="geminiApagar">Apagar</button>
+        <span id="geminiEstado" class="dim"></span>
+      </div>
+
+      <h3 class="sec">Modo recolha</h3>
+      <p class="dim">Para farmar minério e plantas: ao lado do radar do jogo aparece a lista dos recursos (os losangos) com a distância e a direção de cada um, e toca um som quando aparece um novo. Liga e desliga com <b>Ctrl+Alt+R</b>, mesmo dentro do jogo. A app só olha para o radar: andar e apanhar continua a ser contigo. Para acertar as distâncias, passa o rato por cima de um losango no radar. A app lê a distância que o jogo mostra e corrige a escala, o que é preciso de novo se mudares o zoom do radar.</p>
+      <div class="barra-defs">
+        <label class="chk"><input id="recolhaLigada" type="checkbox" /> ligado</label>
+        <label class="chk"><input id="recolhaSom" type="checkbox" /> som quando aparece um recurso</label>
+        <button id="recolhaRepor">Repor a escala</button>
+        <span id="recolhaEscala" class="dim"></span>
+      </div>
+
+      <h3 class="sec">Hidden Cubes</h3>
+      <p class="dim">Os cubos vermelhos escondidos não aparecem no mapa. Com isto ligado, a app procura-os no ecrã do jogo: quando um aparece à vista, mesmo pequenino ao longe, mostra um aviso no topo, um anel à volta dele e toca um som. Liga e desliga com <b>Ctrl+Alt+H</b>, mesmo dentro do jogo, e fica como deixaste quando voltares a abrir a app. Só vê o que está à vista: um cubo atrás de uma rocha ou debaixo de água não aparece.</p>
+      <div class="barra-defs">
+        <label class="chk"><input id="cubosLigada" type="checkbox" /> ligado</label>
+        <label class="chk"><input id="cubosSom" type="checkbox" /> som quando aparece um cubo</label>
+      </div>
+
+      <h3 class="sec">Medidor de DPS</h3>
+      <p class="dim">Lê a janela <b>Análise de combate</b> do jogo (Ctrl+X no jogo) e grava cada luta na aba Combate: total, DPS, curva e habilidades. Liga e desliga com <b>Ctrl+Alt+D</b>. Só lê o ecrã: o dano dos outros membros do grupo não aparece lá e fica de fora.</p>
+      <div class="barra-defs">
+        <label class="chk"><input id="medidorLigado" type="checkbox" /> ligado</label>
+      </div>
+
       <h3 class="sec">Alertas de preço</h3>
       <p class="dim">Criam-se no detalhe de um item, na aba Preços.</p>
       <div id="alertasLista"></div>
@@ -272,7 +454,7 @@
       <div class="sobre">
         <p><b>Aion Helper</b> · app de fãs feita por LusitanoScripts. <b>Sem ligação à NCSoft</b>; Aion e AION 2 são marcas da NCSoft.</p>
         <p><b>Não toca no jogo.</b> Não lê a memória, não intercepta a rede, não altera ficheiros e não carrega em teclas por ti. Só vê o ecrã, como um programa de capturas, e mostra uma janela por cima. Mesmo assim, ferramentas externas usam-se por tua conta.</p>
-        <p><b>Os preços</b> vêm do <a href="#" data-link="https://aion2.exchange/">aion2.exchange</a>, um projeto da comunidade mantido por uma pessoa. A app guarda os dados e só pede de 15 em 15 minutos, para não lhe pesar. <b>Os nomes e os ícones</b>, as habilidades, os tabuleiros Daevanion e as fichas dos personagens vêm do site oficial da NCSoft; a lista de itens vem do dicionário oficial de Taiwan (tw.ncsoft.com), que tem os mesmos números de item. <b>A leitura do ecrã</b> usa o OCR do próprio Windows: nada sai do teu computador além desses pedidos.</p>
+        <p><b>Os preços</b> vêm do <a href="#" data-link="https://aion2.exchange/">aion2.exchange</a>, um projeto da comunidade mantido por uma pessoa. A app guarda os dados e só pede de 15 em 15 minutos, para não lhe pesar. <b>Os nomes e os ícones</b>, as habilidades, os tabuleiros Daevanion e as fichas dos personagens vêm do site oficial da NCSoft; a lista de itens vem do dicionário oficial de Taiwan (tw.ncsoft.com), que tem os mesmos números de item. <b>A lista de mascotes</b> também vem da ficha oficial da NC. <b>Os horários</b> (aba Temporizadores) não são publicados pela NC: juntámos o que a comunidade tira dos ficheiros do cliente e o que os jogadores viram, e cada um diz quão certo é. <b>A leitura do ecrã</b> usa o OCR do próprio Windows: nada sai do teu computador além desses pedidos. <b>O Assistente</b>, se lhe puseres uma chave, envia ao Gemini (Google) as tuas perguntas e os dados da app de que ele precisa para responder.</p>
       </div>
 
       <h3 class="sec">Algo correu mal?</h3>
@@ -286,6 +468,8 @@
 
   <script src="../src/pricing.js"></script>
   <script src="../src/daevanion.js"></script>
+  <script src="../src/temporizadores.js"></script>
+  <script src="../src/medidor.js"></script>
   <script src="js/util.js"></script>
   <script src="js/partilhado-ui.js"></script>
   <script src="js/app.js"></script>
@@ -295,5 +479,10 @@
   <script src="js/builds.js"></script>
   <script src="js/itens.js"></script>
   <script src="js/personagem.js"></script>
+  <script src="js/temporizadores.js"></script>
+  <script src="js/mascotes.js"></script>
+  <script src="js/daevanion.js"></script>
+  <script src="js/assistente.js"></script>
+  <script src="js/combate.js"></script>
 </body>
 </html>

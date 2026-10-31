@@ -7,7 +7,22 @@
   const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
   const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ESC[c]);
 
+  /** Título: o da carta contra o efeito equipado, atributo a atributo. */
+  function tituloHTML(f) {
+    const t = f.titulo;
+    const num = (d) => `${d.delta > 0 ? '+' : d.delta < 0 ? '−' : ''}${Math.abs(d.delta)}${d.pct ? '%' : ''}`;
+    const linhas = t.diferencas
+      .map((d) => `<div class="tl ${d.delta > 0 ? 'sobe' : d.delta < 0 ? 'desce' : 'igual'}"><b>${esc(num(d))}</b> ${esc(d.nome)} <span class="dim">${esc(d.de)} → ${esc(d.para)}</span></div>`)
+      .join('');
+    return `<div class="faixa" style="left:${f.x}px;top:${f.y}px;width:${f.largura}px">
+      <div class="tl-cab">Trocar <b>${esc(t.equipado.nome || 'o equipado')}</b> por <b>${esc(t.escolhido.nome || 'este')}</b></div>
+      ${linhas}
+      <div class="atalho">Atributos diferentes não se somam: compara o que te faz falta · Ctrl+Alt+P para comparar outro</div>
+    </div>`;
+  }
+
   function faixaHTML(f) {
+    if (f.titulo) return tituloHTML(f);
     const partes = [];
     if (f.preco) {
       const p = f.preco;

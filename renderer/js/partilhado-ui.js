@@ -27,7 +27,8 @@
     const casas = tab.nos
       .map((n) => {
         const estado = n.tipo === 'Start' || set.has(n.id) ? 'aberto' : podem.has(n.id) ? 'pode' : 'fechado';
-        const titulo = n.tipo === 'Start' ? 'Início' : `${n.nome}${n.efeitos.length ? '\n' + n.efeitos.join('\n') : ''}`;
+        const c = window.Daevanion.custo(n);
+        const titulo = n.tipo === 'Start' ? 'Início' : `${n.nome}${n.efeitos.length ? '\n' + n.efeitos.join('\n') : ''}\nCusto: ${c} ${c === 1 ? 'cristal' : 'cristais'}`;
         return `<div class="dv-no t-${esc(n.tipo)} g-${GRAU_COR[n.grau] || 'none'} ${estado}" data-no="${n.id}" title="${esc(titulo)}"
           style="grid-row:${n.linha - minL + 1};grid-column:${n.coluna - minC + 1}"></div>`;
       })
@@ -49,11 +50,20 @@
       possiveis += t.nos.filter((n) => n.tipo !== 'Start').length;
     }
     const soma = window.Daevanion.somarEfeitos(nos, abertos);
+    // Cristais gastos, por tipo de cristal (cada tabuleiro gasta o seu).
+    const cristais = new Map();
+    for (const t of tabs) {
+      const g = window.Daevanion.gastoTabuleiro(t, abertosPorTab[t.id] || []);
+      const x = cristais.get(g.cristal) || { gasto: 0, total: 0 };
+      cristais.set(g.cristal, { gasto: x.gasto + g.gasto, total: x.total + g.total });
+    }
+    const linhaCristais = [...cristais].map(([k, v]) => `<li>${esc(k)} <b>${v.gasto}</b> <span class="dim">de ${v.total}</span></li>`).join('');
     const fmt = (e) => (e.valor == null ? `${esc(e.nome)}${e.vezes > 1 ? ` ×${e.vezes}` : ''}` : `${esc(e.nome)} <b>${e.valor > 0 ? '+' : ''}${String(e.valor).replace('.', ',')}${e.unidade}</b>`);
     const hab = soma.filter((e) => e.habilidade).sort((a, b) => b.valor - a.valor);
     const atr = soma.filter((e) => !e.habilidade).sort((a, b) => a.nome.localeCompare(b.nome));
     return `<div class="dv-resumo">
       <div class="dv-conta"><b>${total}</b> de ${possiveis} nós abertos${tabs.length > 1 ? ` nos ${tabs.length} tabuleiros` : ''}</div>
+      <h4>Cristais gastos</h4><ul>${linhaCristais}</ul>
       ${atr.length ? `<h4>Atributos</h4><ul>${atr.map((e) => `<li>${fmt(e)}</li>`).join('')}</ul>` : ''}
       ${hab.length ? `<h4>Níveis de habilidade</h4><ul>${hab.map((e) => `<li>${fmt(e)}</li>`).join('')}</ul>` : ''}
       ${!soma.length ? '<p class="dim">Nenhum nó aberto.</p>' : ''}

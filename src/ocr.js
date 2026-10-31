@@ -99,6 +99,30 @@ class OCR {
     return this.pedir(`LER ${Math.round(x)} ${Math.round(y)} ${Math.round(w)} ${Math.round(h)}`);
   }
 
+  /** Só a janela do jogo, se estiver à frente: { jogo, janela } (mais leve que ver()). */
+  janela(processo = 'AION2') {
+    return this.pedir('JANELA ' + processo);
+  }
+
+  /** Píxeis de uma zona do ecrã, no formato de src/imagem.js. */
+  async pixeis(x, y, w, h) {
+    [x, y, w, h] = [x, y, w, h].map(Math.round);
+    const b64 = await this.pedir(`PIX ${x} ${y} ${w} ${h}`);
+    return require('./imagem').deBGRA(Buffer.from(b64, 'base64'), w, h);
+  }
+
+  /** OCR só do texto verde-água de uma zona (o rótulo "Hidden Cube"); caixas em coordenadas do ecrã. */
+  lerRotulos(x, y, w, h) {
+    return this.pedir(`ROTULOS ${Math.round(x)} ${Math.round(y)} ${Math.round(w)} ${Math.round(h)}`);
+  }
+
+  /** Píxeis de uma zona reduzida f vezes (píxel sim, píxel não): imagem de w/f × h/f. */
+  async pixeisReduzidos(x, y, w, h, f) {
+    [x, y, w, h] = [x, y, w, h].map(Math.round);
+    const b64 = await this.pedir(`PIXR ${x} ${y} ${w} ${h} ${f}`);
+    return require('./imagem').deBGRA(Buffer.from(b64, 'base64'), Math.floor(w / f), Math.floor(h / f));
+  }
+
   parar() {
     if (!this.proc) return;
     const pid = this.proc.pid;

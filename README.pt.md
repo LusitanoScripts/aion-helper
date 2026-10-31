@@ -88,6 +88,13 @@ Dentro de cada build, sub-aba **Daevanion**: os 5 tabuleiros da classe (tirados 
 - **Servidores de reserva** (Definições): quando o teu servidor não tem anúncios de um item, a app usa o preço de outro servidor e diz qual. Sem nada marcado, usa o maior da tua região e fação.
 - **Guardar diagnóstico** (Definições): junta numa pasta as últimas capturas, o que a app leu e os erros, para mandares a quem te está a ajudar.
 
+## Combate (medidor de DPS)
+
+- **Em cima da janela oficial.** O jogo já mede o teu dano na **Análise de combate** (Ctrl+X no jogo), mas não guarda o histórico que tu queres. Com **Ctrl+Alt+D** ligado, a app lê essa janela do ecrã uma vez por segundo e grava cada luta: alvo, duração, dano total, DPS, pico de DPS em 5 s e a curva.
+- **Lutas**: uma luta acaba ao fim de 5 s sem dano, quando o tempo do jogo volta a 00:00 ou quando muda o alvo. Lutas com menos de 5 s não contam. Guarda as últimas 500.
+- **Comparar**: marca duas lutas e vê DPS, total e curvas lado a lado, com a diferença em %. Uma etiqueta à mão ("Build B", "com poções") ajuda a saber o que mudou.
+- **Só o teu dano.** O dano dos outros membros do grupo não aparece no ecrã. Os medidores que o mostram leem o tráfego de rede do jogo, e a app não faz isso.
+
 ## Resoluções
 
 Tudo foi medido a **2560×1440**. Noutras resoluções a app leva a imagem à escala de 1440p antes de ler a mochila, e mede os cartões pela largura do rodapé. Só foi testado com versões sintéticas das capturas: a 4K acerta 35 de 35 quantidades, a 1600p 32, a 1200p 33 e a 1080p 27. Nenhum item foi mal identificado. A Mochila marca a leitura como "resolução experimental". Para afinar, falta uma captura verdadeira a 1080p.

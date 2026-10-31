@@ -25,6 +25,7 @@ Fan-made app, not affiliated with NCSoft. **It doesn't touch the game**: it does
 - **Character** (*Personagem*): any player's official sheet: combat power, item level, stats, gear (click a piece for its stats and stones), wings, pet, titles, skills and Daevanion boards. *Criar build com isto* turns it into a build.
 - **Builds**: 4×12 skill bar (drag and drop), skill levels and specializations (◆), priority lists, macros and notes. **Daevanion** planner with the 5 boards of each class and the sum of everything you open. Import from your character, and share a build with an `AH1:…` code.
 - **Notes**: a note per item, shown under its tooltip in game (also for bound items).
+- **Combat** (*Combate*): a DPS log built on the game's own Combat Analysis window (Ctrl+X in game). With **Ctrl+Alt+D** on, the app reads that window from the screen and saves every fight: target, duration, total damage, DPS, peak DPS and a DPS curve. Tag fights ("Build B") and compare two side by side. Your damage only: party members' damage never appears on screen, and the app does not read network traffic.
 
 The game must run in **borderless window** mode: in exclusive fullscreen no window can stay on top.
 

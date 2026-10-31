@@ -153,6 +153,30 @@
     }
   });
 
+  // Modo recolha: o atalho também o liga, por isso o estado vem sempre do main.
+  function desenharRecolha(r) {
+    $('#recolhaLigada').checked = r.ligada;
+    $('#recolhaSom').checked = r.som;
+    $('#recolhaEscala').textContent = r.mPorPx
+      ? `Escala acertada pelo jogo: ${r.mPorPx.toLocaleString('pt-PT')} m por píxel (a 1440p).`
+      : 'Escala por omissão (~1 m por píxel); as distâncias são aproximadas até passares o rato num losango.';
+  }
+  window.api.recolha().then(desenharRecolha);
+  window.api.aoMudarRecolha(desenharRecolha);
+  $('#recolhaLigada').addEventListener('change', async (e) => desenharRecolha(await window.api.ligarRecolha(e.target.checked)));
+  $('#recolhaSom').addEventListener('change', async (e) => desenharRecolha(await window.api.mudarRecolha({ som: e.target.checked })));
+  $('#recolhaRepor').addEventListener('click', async () => desenharRecolha(await window.api.mudarRecolha({ mPorPx: null })));
+
+  // Hidden Cubes: também com atalho, por isso o estado vem do main.
+  function desenharCubos(c) {
+    $('#cubosLigada').checked = c.ligada;
+    $('#cubosSom').checked = c.som;
+  }
+  window.api.cubos().then(desenharCubos);
+  window.api.aoMudarCubos(desenharCubos);
+  $('#cubosLigada').addEventListener('change', async (e) => desenharCubos(await window.api.ligarCubos(e.target.checked)));
+  $('#cubosSom').addEventListener('change', async (e) => desenharCubos(await window.api.mudarCubos({ som: e.target.checked })));
+
   // Carrega quando se abre a aba (e de cada vez: o servidor escolhido pode ter mudado).
   document.querySelector('#abas').addEventListener('click', (e) => {
     const b = e.target.closest('button[data-aba="definicoes"]');

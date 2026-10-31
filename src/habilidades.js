@@ -94,8 +94,13 @@ function limparHabilidade(s) {
 
 /** As habilidades de um personagem, tal como a ficha oficial as dá. */
 async function habilidadesDoPersonagem({ servidor, personagem }, { idioma = 'pt-BR', regiao = 'eu' } = {}) {
-  const j = await getJSON(`${NC}/api/character/equipment${qs({ lang: idioma, region: regiao, serverId: servidor, characterId: personagem })}`);
-  const lista = j && j.skill && j.skill.skillList;
+  // A NC às vezes responde sem as habilidades (null) e à seguinte já as traz: tenta-se algumas vezes.
+  let lista = null;
+  for (let i = 0; i < 6 && !Array.isArray(lista); i++) {
+    if (i) await new Promise((r) => setTimeout(r, 800));
+    const j = await getJSON(`${NC}/api/character/equipment${qs({ lang: idioma, region: regiao, serverId: servidor, characterId: personagem })}`);
+    lista = j && j.skill && j.skill.skillList;
+  }
   if (!Array.isArray(lista)) throw new Error('NC: a ficha do personagem não trouxe habilidades');
   return lista.map(limparHabilidade);
 }

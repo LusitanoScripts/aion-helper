@@ -72,7 +72,7 @@
     st.ref = { servidor: p.servidor, personagem: p.personagem, regiao: $('#peRegiao').value };
     st.tabs = [];
     st.abertos = {};
-    estado('A ler a ficha…');
+    estado('A ler a ficha… (a NC anda instável: pode levar até meio minuto)');
     $('#peDetalhe').className = 'detalhe vazio';
     $('#peDetalhe').innerHTML = '<p class="dica">Clica numa peça de equipamento para a ver.</p>';
     try {
@@ -84,7 +84,19 @@
     estado('');
     desenhar();
     // Os tabuleiros com alguma coisa aberta, um a um (são 5 pedidos no máximo).
+    // Copiar o Daevanion ou criar a build espera por todos (st.dvPronto): antes
+    // copiava-se só o que já tinha chegado.
     const ref = st.ref;
+    let acabou;
+    st.dvPronto = new Promise((r) => (acabou = r));
+    try {
+      await lerTabuleiros(ref);
+    } finally {
+      acabou();
+    }
+  }
+
+  async function lerTabuleiros(ref) {
     for (const t of st.ficha.tabuleiros.filter((x) => x.abertos > 0)) {
       try {
         const d = await window.api.tabuleiroPersonagem(ref, t.id);
@@ -109,6 +121,29 @@
     </button>`;
   }
 
+  // A NC às vezes manda a ficha sem equipamento/habilidades/atributos (13 Out 2026): diz-se o que
+  // veio de uma leitura anterior guardada e o que não veio de todo.
+  const PARTES = { atributos: 'atributos', nivelItem: 'nível de item', equipamento: 'equipamento', habilidades: 'habilidades' };
+  function idade(ms) {
+    const m = Math.round(ms / 60000);
+    if (m < 60) return `há ${m} min`;
+    const h = Math.round(m / 60);
+    return h < 48 ? `há ${h} h` : `há ${Math.round(h / 24)} dias`;
+  }
+  function avisoNC(f) {
+    const nc = f.nc;
+    if (!nc) return '';
+    const velhos = Object.keys(nc.velhos || {});
+    const duv = nc.duvidas || {};
+    const partes = [];
+    if (duv.atributos) partes.push('os atributos não vieram iguais em todas as leituras (mostra-se o mais repetido)');
+    if (duv.nivelItem) partes.push(`o nível de item veio diferente entre leituras (${duv.nivelItem.join(', ')})`);
+    if (velhos.length) partes.push(`${velhos.map((k) => `${PARTES[k]} (${idade(nc.velhos[k])})`).join(', ')} vêm da última leitura guardada`);
+    if (nc.faltam.length) partes.push(`não veio: ${nc.faltam.map((k) => PARTES[k]).join(', ')}`);
+    if (!partes.length) return '';
+    return `<div class="pe-aviso-nc">A NC está instável (${nc.leituras} leituras): ${partes.join('; ')}. <button id="peReler" class="tz-acertar">Ler outra vez</button></div>`;
+  }
+
   function desenhar() {
     const f = st.ficha;
     const p = f.perfil;
@@ -116,10 +151,10 @@
     const outras = f.equipamento.filter((x) => !GRUPOS.some(([, l]) => l.includes(x.casaNome)));
     const hab = (cat) =>
       f.habilidades
-        .filter((h) => h.categoria === cat && h.nivel > 0)
+        .filter((h) => h.categoria === cat && (h.nivel > 0 || h.equipada))
         .map(
           (h) => `<div class="bl-hab cat-${esc(h.categoria)}${cat === 'Dp' && !h.equipada ? ' usada' : ''}" title="${esc(h.nome)}${cat === 'Dp' ? (h.equipada ? ' · equipado' : ' · não equipado') : ''}">
-            <img src="${esc(icone(h.icone))}" alt="" /><span class="niv">${h.nivel}</span></div>`,
+            <img src="${esc(icone(h.icone))}" alt="" />${h.nivel ? `<span class="niv">${h.nivel}</span>` : ''}</div>`,
         )
         .join('') || '<span class="dim">nenhuma</span>';
 
@@ -134,7 +169,9 @@
         <div class="poder"><span>Poder de combate</span><b>${Number(p.poder || 0).toLocaleString('pt-PT')}</b></div>
         ${p.nivelItem != null ? `<div class="poder"><span>Nível de item</span><b>${p.nivelItem}</b></div>` : ''}
         <button id="peCriarBuild" class="primario" title="Uma build nova com a classe, os níveis das habilidades, os estigmas e o Daevanion deste personagem">Criar build com isto</button>
+        <button id="peCopiarDv" class="tz-acertar" title="Um plano novo na aba Daevanion com os nós que este personagem tem abertos — para o seguires nos teus">Copiar Daevanion</button>
       </div>
+      ${avisoNC(f)}
 
       <div class="pe-grelha">
         <section>
@@ -185,6 +222,8 @@
       return desenharDv();
     }
     if (e.target.closest('#peCriarBuild')) return criarBuild();
+    if (e.target.closest('#peReler')) return abrir(st.ref);
+    if (e.target.closest('#peCopiarDv')) return copiarDaevanion();
     const b = e.target.closest('.pe-equip[data-casa]');
     if (!b) return;
     document.querySelectorAll('.pe-equip.on').forEach((x) => x.classList.remove('on'));
@@ -201,6 +240,11 @@
   });
 
   async function criarBuild() {
+    if (st.dvPronto) {
+      estado('A acabar de ler os tabuleiros do Daevanion…');
+      await st.dvPronto;
+      estado('');
+    }
     const f = st.ficha;
     if (!st.classes) st.classes = (await window.api.classes()).dados;
     const c = st.classes.find((x) => x.pcIds.includes(f.perfil.pcId));
@@ -215,7 +259,30 @@
     const naBarra = [...f.habilidades.filter((h) => h.categoria === 'Active' && h.nivel > 0), ...f.habilidades.filter((h) => h.categoria === 'Dp' && h.equipada)];
     naBarra.slice(0, b.barra.length).forEach((h, i) => (b.barra[i] = h.id));
     const g = await window.api.guardarBuild(b);
-    await window.Builds.abrirBuild(g);
+    const comNivel = f.habilidades.filter((h) => h.nivel > 0).length;
+    const nosDv = Object.values(st.abertos).reduce((n, l) => n + l.length, 0);
+    await window.Builds.abrirBuild(
+      g,
+      `Build criada a partir de <b>${esc(f.perfil.nome)}</b>: ${comNivel} habilidades com nível, ${b.prioridade.Dp.length} estigmas equipados e ${nosDv} nós do Daevanion. Na barra ficaram as ativas e os estigmas equipados, por ordem. A ficha oficial não diz as especializações nem a ordem em que usas as habilidades: a prioridade das ativas e das passivas fica para preencheres.`,
+    );
+  }
+
+  async function copiarDaevanion() {
+    if (st.dvPronto) {
+      estado('A acabar de ler os tabuleiros do Daevanion…');
+      await st.dvPronto;
+      estado('');
+    }
+    const f = st.ficha;
+    if (!st.classes) st.classes = (await window.api.classes()).dados;
+    const c = st.classes.find((x) => x.pcIds.includes(f.perfil.pcId));
+    if (!c) return estado('Não sei de que classe é este personagem.', 'erro');
+    const nos = Object.values(st.abertos).reduce((n, l) => n + l.length, 0);
+    if (!nos) return estado('Este personagem não tem nós do Daevanion abertos (ou ainda não acabaram de ler).', 'erro');
+    await window.PlanosDaevanion.importar(
+      { nome: `${f.perfil.nome} (nível ${f.perfil.nivel})`, classe: c.nome, daevanion: st.abertos },
+      `Copiado de <b>${esc(f.perfil.nome)}</b>: ${nos} nós abertos nos tabuleiros. Já está gravado — muda o nome, tira ou junta nós e grava outra vez.`,
+    );
   }
 
   // ── arranque ─────────────────────────────────────────────────────────────

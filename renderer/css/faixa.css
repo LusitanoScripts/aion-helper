@@ -61,3 +61,44 @@ html, body {
 .v-mercado::before { content: "▲"; }
 .v-loja { color: #8fc0ff; }
 .v-loja::before { content: "●"; }
+
+/* ── o aviso das mascotes (renderer/mascote.html) ── */
+.mascote { border-top: 1px solid rgba(73, 81, 88, 0.9); border-radius: 0 0 4px 4px; padding: 7px 14px 8px; font-size: 15px; max-width: 420px; }
+.m-tem { color: var(--green); font-weight: 600; }
+.m-falta { color: var(--amber); font-weight: 600; }
+.aviso-m { border-left-color: var(--green); font-size: 14px; }
+
+/* Comparação de títulos */
+.tl-cab { font-size: 14px; margin-bottom: 4px; color: #c9d2e0; }
+.tl-cab b { color: #f0d48a; font-weight: 600; }
+.tl { font-size: 15px; line-height: 1.45; }
+.tl b { display: inline-block; min-width: 58px; font-weight: 700; }
+.tl.sobe b { color: #5fe08f; }
+.tl.desce b { color: #ff6f6f; }
+.tl.igual b { color: #8a94a8; }
+.tl .dim { font-size: 12px; margin-left: 4px; }
+.m-nome { font-size: 17px; font-weight: 700; color: #f0d48a; margin: 1px 0 2px; }
+.m-nome .dim { font-size: 13px; font-weight: 400; }
+.m-max { color: var(--teal, #3fc9c0); font-weight: 600; }
+
+/* ── modo recolha (Ctrl+Alt+R): os recursos do radar ── */
+/* Hidden Cubes: aviso no topo e anel à volta do cubo. O anel é dourado e não
+   vermelho: a vigia fotografa o ecrã com ele lá, e um anel vermelho encostado
+   ao cubo passava no filtro de cor (src/cubo.js) e estragava-lhe a forma. */
+.cubo-r { min-width: 420px; border-left-color: #ff5a4e; font-size: 16px; }
+.cubo-t { color: #ff9a8a; font-weight: 600; }
+.cubo-anel {
+  position: fixed;
+  border: 3px solid #ffe27a;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(255, 226, 122, .8);
+  box-sizing: border-box;
+}
+
+.radar-r { animation: none; min-width: 190px; border-left-color: #5fe0cf; font-size: 15px; }
+.r-item { display: flex; align-items: baseline; gap: 8px; font-family: var(--mono); }
+.r-item b { color: #8dfbe9; font-weight: 600; }
+.r-seta { width: 1.2em; text-align: center; color: var(--txt); font-family: var(--sans); }
+.r-outro b { color: #6aa89f; }
+.r-novo b { color: var(--gold); }
+.r-novo::after { content: "novo"; font-family: var(--sans); font-size: 11px; color: var(--gold); text-transform: uppercase; letter-spacing: .6px; }

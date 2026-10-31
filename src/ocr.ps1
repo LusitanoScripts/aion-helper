@@ -14,6 +14,10 @@
 #   VER                   ->  OK {"jogo":bool, "janela":[x,y,w,h], "rodapes":[{esquerda,direita,topo,fundo}]}
 #                             (coordenadas do ecrã; só procura se o AION2 estiver à frente)
 #   LER <x> <y> <w> <h>   ->  OK [{x1,y1,x2,y2,t}, ...] em coordenadas do ecrã
+#   JANELA [processo]     ->  OK {"jogo":bool, "janela":[x,y,w,h]} (o VER sem procurar rodapés)
+#   PIX <x> <y> <w> <h>   ->  OK "<base64 BGRA>" — píxeis em bruto de uma zona pequena
+#   PIXR <x> <y> <w> <h> <f> -> OK "<base64 BGRA>" — o mesmo, reduzido f vezes (w/f × h/f)
+#   ROTULOS <x> <y> <w> <h> -> OK [{x1,y1,x2,y2,t}, ...] — OCR só do texto verde-água (rótulo "Hidden Cube")
 #   PING                  ->  OK pronto
 #   SAIR                  ->  (fecha)
 # Erro: ERR <mensagem>
@@ -65,6 +69,57 @@ public class Olho {
     using (Graphics g = Graphics.FromImage(b))
       g.CopyFromScreen(x, y, 0, 0, new Size(w, h), CopyPixelOperation.SourceCopy);
     return b;
+  }
+
+  // O rótulo "Hidden Cube" que o jogo escreve por cima do cubo quando se está
+  // perto: verde-água (~65,133,97) e esbatido, sobre relva e pedra — o OCR do
+  // ecrã tal como está não o lê. Pinta-se essa cor a preto e o resto a branco,
+  // e aí lê. É a mesma regra do src/cubo.js (verdeAgua).
+  public static Bitmap MascaraVerdeAgua(Bitmap b) {
+    int w = b.Width, h = b.Height;
+    Bitmap m = new Bitmap(w, h, PixelFormat.Format32bppArgb);
+    BitmapData s = b.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+    BitmapData d = m.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+    byte[] linha = new byte[w * 4];
+    byte[] saida = new byte[w * 4];
+    for (int y = 0; y < h; y++) {
+      Marshal.Copy(s.Scan0 + y * s.Stride, linha, 0, w * 4);
+      for (int x = 0; x < w; x++) {
+        int bb = linha[x * 4], g = linha[x * 4 + 1], r = linha[x * 4 + 2];
+        bool t = g >= 95 && g - r >= 45 && bb >= 60 && g - bb >= 15 && g - bb <= 70;
+        byte v = (byte)(t ? 0 : 255);
+        saida[x * 4] = v; saida[x * 4 + 1] = v; saida[x * 4 + 2] = v; saida[x * 4 + 3] = 255;
+      }
+      Marshal.Copy(saida, 0, d.Scan0 + y * d.Stride, w * 4);
+    }
+    b.UnlockBits(s);
+    m.UnlockBits(d);
+    return m;
+  }
+
+  // Píxeis em bruto (BGRA, linha a linha) de uma zona pequena, em base64 — o
+  // radar do modo recolha (331×221 a 1440p) lido duas vezes por segundo.
+  public static string Pix(int x, int y, int w, int h) {
+    using (Bitmap b = Copiar(x, y, w, h)) {
+      BitmapData bd = b.LockBits(new Rectangle(0, 0, w, h), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+      byte[] buf = new byte[w * h * 4];
+      for (int j = 0; j < h; j++) Marshal.Copy(bd.Scan0 + j * bd.Stride, buf, j * w * 4, w * 4);
+      b.UnlockBits(bd);
+      return Convert.ToBase64String(buf);
+    }
+  }
+
+  // O mesmo, reduzido f vezes (o ecrã inteiro a 1440p em bruto seriam ~20 MB
+  // por foto no canal; a metade ~5 MB). Usado pela vigia dos Hidden Cubes.
+  public static string PixReduzido(int x, int y, int w, int h, int f) {
+    using (Bitmap b = CopiarReduzido(x, y, w, h, f)) {
+      int rw = w / f, rh = h / f;
+      BitmapData bd = b.LockBits(new Rectangle(0, 0, rw, rh), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+      byte[] buf = new byte[rw * rh * 4];
+      for (int j = 0; j < rh; j++) Marshal.Copy(bd.Scan0 + j * bd.Stride, buf, j * rw * 4, rw * 4);
+      b.UnlockBits(bd);
+      return Convert.ToBase64String(buf);
+    }
   }
 
   [DllImport("user32.dll")] static extern IntPtr GetDC(IntPtr h);
@@ -254,6 +309,42 @@ while ($true) {
       if ($null -eq $j -or $j[2] -lt 200 -or $j[3] -lt 200) { [Console]::Out.WriteLine('OK {"jogo":false}'); continue }
       $rod = [Olho]::Rodapes($j[0], $j[1], $j[2], $j[3])
       [Console]::Out.WriteLine('OK {"jogo":true,"janela":[' + ($j -join ',') + '],"rodapes":' + $rod + '}')
+      continue
+    }
+
+    if ($linha.StartsWith('JANELA')) {
+      $p = $linha.Split(' ')
+      $processo = if ($p.Count -gt 1) { $p[1] } else { 'AION2' }
+      $j = [Olho]::JanelaDoJogo($processo)
+      if ($null -eq $j -or $j[2] -lt 200 -or $j[3] -lt 200) { [Console]::Out.WriteLine('OK {"jogo":false}'); continue }
+      [Console]::Out.WriteLine('OK {"jogo":true,"janela":[' + ($j -join ',') + ']}')
+      continue
+    }
+
+    if ($linha.StartsWith('PIXR ')) {
+      $p = $linha.Split(' ')
+      [Console]::Out.WriteLine('OK "' + [Olho]::PixReduzido([int]$p[1], [int]$p[2], [int]$p[3], [int]$p[4], [int]$p[5]) + '"')
+      continue
+    }
+
+    if ($linha.StartsWith('PIX ')) {
+      $p = $linha.Split(' ')
+      [Console]::Out.WriteLine('OK "' + [Olho]::Pix([int]$p[1], [int]$p[2], [int]$p[3], [int]$p[4]) + '"')
+      continue
+    }
+
+    if ($linha.StartsWith('ROTULOS ')) {
+      $p = $linha.Split(' ')
+      $x = [int]$p[1]; $y = [int]$p[2]; $w = [int]$p[3]; $h = [int]$p[4]
+      $bmp = [Olho]::Copiar($x, $y, $w, $h)
+      $mask = [Olho]::MascaraVerdeAgua($bmp)
+      $bmp.Dispose()
+      $ms = New-Object System.IO.MemoryStream
+      $mask.Save($ms, [System.Drawing.Imaging.ImageFormat]::Png)
+      $mask.Dispose()
+      $bytes = $ms.ToArray()
+      $ms.Dispose()
+      [Console]::Out.WriteLine('OK ' + (LerPNG $bytes $x $y))
       continue
     }
 

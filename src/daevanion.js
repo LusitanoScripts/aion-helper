@@ -79,7 +79,36 @@
   }
 
 
-  const api = { abriveis, fechar, somarEfeitos };
+  // O custo de um nó em cristais é o grau dele: Comum 1, Raro 2, Épico (Legend)
+  // 3, Único 4; o início é de graça. A NC não o diz; visto nos dados do cliente
+  // que a comunidade publica (gamers4.life): 1 048 nós do Gladiador, nenhuma
+  // exceção, em todos os tabuleiros.
+  const CUSTO = { Common: 1, Rare: 2, Legend: 3, Unique: 4 };
+  function custo(no) {
+    return no.tipo === 'Start' ? 0 : CUSTO[no.grau] || 0;
+  }
+
+  // Cada tabuleiro gasta o seu cristal, pelo nome do senhor do tabuleiro.
+  const CRISTAIS = { Ariel: 'Cristal de Conquista', Azphel: 'Cristal de Batalha', Marchutan: 'Cristal de Temporada', Yustiel: 'Cristal de Temporada' };
+  function cristal(nomeTabuleiro) {
+    const k = Object.keys(CRISTAIS).find((x) => String(nomeTabuleiro || '').includes(x));
+    return k ? CRISTAIS[k] : 'Cristal Daevanion';
+  }
+
+  /** Cristais gastos num tabuleiro (os ids abertos) e quanto custa abri-lo todo. */
+  function gastoTabuleiro(tab, abertos) {
+    const set = new Set(abertos);
+    let gasto = 0;
+    let total = 0;
+    for (const n of tab.nos) {
+      const c = custo(n);
+      total += c;
+      if (set.has(n.id)) gasto += c;
+    }
+    return { gasto, total, cristal: cristal(tab.nome) };
+  }
+
+  const api = { abriveis, fechar, somarEfeitos, custo, cristal, gastoTabuleiro };
   if (typeof module === 'object' && module.exports) module.exports = api;
   else raiz.Daevanion = api;
 })(typeof self !== 'undefined' ? self : this);

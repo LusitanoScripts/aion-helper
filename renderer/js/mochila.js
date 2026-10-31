@@ -107,6 +107,31 @@
     }
     itens.sort((a, b) => (b.u ? b.u.valor * b.quantidade : 0) - (a.u ? a.u.valor * a.quantidade : 0));
 
+    // O Assistente conselha a partir disto (o que esta tabela mostra, em números).
+    window.api
+      .assistenteMochila({
+        servidor,
+        kinah,
+        valor_mercado_total: total,
+        recebes_depois_da_taxa: P.liquido(total),
+        itens_sem_preco: semPreco,
+        casas_fora_do_mercado: fora.length,
+        itens: itens.slice(0, 60).map((it) => {
+          const un = r.lojas ? r.lojas[it.id] : null;
+          return {
+            nome: (it.ficha && it.ficha.nome) || '#' + it.id,
+            quantidade: it.quantidade,
+            preco_unidade: it.u ? it.u.valor : null,
+            base: it.u ? it.u.base : null,
+            preco_de_outro_servidor: (it.u && it.u.deOutro) || null,
+            liquido_pilha: it.u ? P.liquido(it.u.valor * it.quantidade) : null,
+            loja_paga_pilha: un != null ? un * it.quantidade : null,
+            avisos: (it.u && it.u.avisos) || [],
+          };
+        }),
+      })
+      .catch(() => {});
+
     estado(
       `<b>${r.casas.length}</b> casas ocupadas · <b>${itens.length}</b> reconhecidas no mercado · ${fora.length} fora do mercado` +
         ` · preços de ${esc(window.App.nomeServidor())} · ecrã ${esc(r.resolucao)}` +

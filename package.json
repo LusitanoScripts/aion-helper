@@ -1,11 +1,11 @@
 {
   "name": "aion-helper",
-  "version": "0.3.0",
+  "version": "0.7.0",
   "description": "Aion 2 companion: preços do mercado, valor da mochila e o preço por baixo do cartão de cada item. App de fãs, sem ligação à NCSoft.",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "test": "node scripts/test-pricing.js && node scripts/test-sources.js && node scripts/test-quantidades.js && node scripts/test-mochila.js && node scripts/test-cartoes.js && node scripts/test-vigia.js && node scripts/test-alertas.js && node scripts/test-olho.js && node scripts/test-autoria.js && node scripts/test-builds.js && node scripts/check-globals.js",
+    "test": "node scripts/test-pricing.js && node scripts/test-sources.js && node scripts/test-quantidades.js && node scripts/test-mochila.js && node scripts/test-cartoes.js && node scripts/test-vigia.js && node scripts/test-alertas.js && node scripts/test-olho.js && node scripts/test-autoria.js && node scripts/test-builds.js && node scripts/test-temporizadores.js && node scripts/test-olho-mascotes.js && node scripts/test-colecao-retratos.js && node scripts/test-titulos.js && node scripts/test-radar.js && node scripts/test-cubo.js && node scripts/test-missoes.js && node scripts/test-assistente.js && node scripts/test-medidor.js && node scripts/check-globals.js",
     "selftest": "node scripts/selftest.js",
     "icon": "node scripts/make-icon.js",
     "dist": "node scripts/make-icon.js && electron-builder --win --publish never"

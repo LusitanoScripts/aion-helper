@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+  <title>Aion Helper · mascote</title>
+  <link rel="stylesheet" href="css/faixa.css" />
+</head>
+<body>
+  <!--
+    Como a janela das faixas: transparente, do tamanho do ecrã, por cima do jogo
+    e sem apanhar o rato. Mostra por baixo do nome do alvo se a mascote já é tua,
+    e um aviso curto quando o chat dá uma alma ou a coleção é lida.
+  -->
+  <div id="alvo"></div>
+  <div id="aviso"></div>
+  <!-- Modo recolha (Ctrl+Alt+R): os recursos do radar, ao lado dele. -->
+  <div id="radar"></div>
+  <!-- Hidden Cubes (Ctrl+Alt+H): aviso no topo e um anel à volta de cada cubo. -->
+  <div id="cubo"></div>
+  <script src="js/mascote-ui.js"></script>
+</body>
+</html>

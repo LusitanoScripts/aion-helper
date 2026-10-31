@@ -15,6 +15,7 @@
 
 const { getJSON } = require('./http');
 const { procurarPersonagens } = require('./habilidades');
+const { fichaItem } = require('./sources');
 
 const NC = 'https://aion2.plaync.com';
 
@@ -32,25 +33,125 @@ function descricoes(l) {
   return (Array.isArray(l) ? l : []).map((e) => e && e.desc).filter(Boolean);
 }
 
-async function ficha(ref, opts) {
+// A NC anda instável (13 Out 2026): o MESMO pedido, repetido de segundos a segundos, umas
+// vezes traz equipamento/habilidades/atributos e outras vem com null ou tudo a 0 — e às
+// vezes com atributos de outra leitura. Ex.: 10 pedidos → equipamento 4×, habilidades 2×.
+// Por isso lê-se várias vezes e, em cada secção, fica a resposta que mais se repete.
+const RONDAS_MAX = 6;
+const PAUSA_MS = 800;
+
+function moda(lista) {
+  const conta = new Map();
+  for (const v of lista) {
+    const k = JSON.stringify(v);
+    const c = conta.get(k) || { v, n: 0 };
+    c.n++;
+    conta.set(k, c);
+  }
+  let melhor = null;
+  for (const c of conta.values()) if (!melhor || c.n > melhor.n) melhor = c;
+  return melhor;
+}
+
+const temLista = (l) => Array.isArray(l) && l.length > 0;
+const semNivelItem = (stats) => stats.filter((s) => s.type !== 'ItemLevel');
+const statsVazios = (stats) => !temLista(stats) || semNivelItem(stats).every((s) => !s.value);
+
+async function lerVariasVezes(q) {
+  const infos = [];
+  const eqs = [];
+  for (let i = 0; i < RONDAS_MAX; i++) {
+    if (i) await new Promise((r) => setTimeout(r, PAUSA_MS));
+    const [info, eq] = await Promise.all([
+      getJSON(`${NC}/api/character/info${qs(q)}`).catch((e) => (i === 0 ? Promise.reject(e) : null)),
+      getJSON(`${NC}/api/character/equipment${qs(q)}`).catch(() => null),
+    ]);
+    if (info && info.profile) infos.push(info);
+    if (eq) eqs.push(eq);
+    const st = infos.map((x) => (x.stat && x.stat.statList) || []).filter((l) => !statsVazios(l)).map(semNivelItem);
+    const okStats = st.length && moda(st).n >= 2;
+    const okEq = eqs.some((x) => x.equipment && temLista(x.equipment.equipmentList));
+    const okSk = eqs.some((x) => x.skill && temLista(x.skill.skillList));
+    if (okStats && okEq && okSk) break;
+  }
+  return { infos, eqs };
+}
+
+/**
+ * opts.memoria (opcional) = { ler(chave) → {dados, idadeMs} | null, gravar(chave, dados) }:
+ * guarda cada secção boa; quando a NC não a manda, usa-se a guardada e diz-se de quando é.
+ */
+async function ficha(ref, opts = {}) {
   const q = base(ref, opts);
-  const [info, eq] = await Promise.all([getJSON(`${NC}/api/character/info${qs(q)}`), getJSON(`${NC}/api/character/equipment${qs(q)}`)]);
+  const { infos, eqs } = await lerVariasVezes(q);
+  const info = infos[0];
   if (!info || !info.profile || !info.profile.characterName) throw new Error('A NC não tem esse personagem (apagado ou mudou de nome?)');
   const p = info.profile;
-  const stats = (info.stat && info.stat.statList) || [];
-  // O nível de item vem como atributo, e com o nome por traduzir ("아이템레벨" em todos os idiomas, 10 Out 2026).
-  const nivelItem = stats.find((s) => s.type === 'ItemLevel');
-  const asa = eq && eq.petwing && eq.petwing.wing;
-  const pet = eq && eq.petwing && eq.petwing.pet;
+
+  // Atributos: a leitura não-vazia mais repetida; o nível de item à parte (também varia).
+  const leiturasStats = infos.map((x) => (x.stat && x.stat.statList) || []).filter((l) => !statsVazios(l));
+  const mStats = leiturasStats.length ? moda(leiturasStats.map(semNivelItem)) : null;
+  // De preferência das leituras cujos atributos batem com os escolhidos (as outras às vezes trazem outro valor).
+  const chaveStats = mStats ? JSON.stringify(mStats.v) : null;
+  const nivelDe = (l) => l.find((s) => s.type === 'ItemLevel');
+  const concordam = leiturasStats.filter((l) => JSON.stringify(semNivelItem(l)) === chaveStats).map(nivelDe).filter((s) => s && s.value);
+  const niveis = concordam.length ? concordam : infos.map((x) => nivelDe((x.stat && x.stat.statList) || [])).filter((s) => s && s.value);
+  const mNivel = niveis.length ? moda(niveis.map((s) => s.value)) : null;
+  const listaEq = eqs.map((x) => x.equipment && x.equipment.equipmentList).filter(temLista);
+  const listaSk = eqs.map((x) => x.skill && x.skill.skillList).filter(temLista);
+  const pw = eqs.map((x) => x.petwing).filter(Boolean);
+
+  const novo = {
+    atributos: mStats ? mStats.v : null,
+    nivelItem: mNivel ? mNivel.v : null,
+    equipamento: listaEq.length ? moda(listaEq).v : null,
+    habilidades: listaSk.length ? moda(listaSk).v : null,
+  };
+
+  // O que faltou vem da última leitura boa guardada (com a idade, para a ficha avisar).
+  const velhos = {};
+  const mem = opts.memoria;
+  const chave = `ficha-${ref.servidor}-${ref.personagem}`;
+  if (mem) {
+    let guardado = null;
+    try {
+      guardado = mem.ler(chave);
+    } catch {}
+    const g = (guardado && guardado.dados) || {};
+    for (const k of Object.keys(novo)) {
+      if (novo[k] == null && g[k] && g[k].v != null) {
+        novo[k] = g[k].v;
+        velhos[k] = Date.now() - g[k].quando;
+      }
+    }
+    const gravar = { ...g };
+    const agora = Date.now();
+    for (const k of Object.keys(novo)) if (novo[k] != null && velhos[k] == null) gravar[k] = { v: novo[k], quando: agora };
+    try {
+      mem.gravar(chave, gravar);
+    } catch {}
+  }
+  const faltam = Object.keys(novo).filter((k) => novo[k] == null);
+  // Leituras que não batem umas com as outras: a ficha mostra a mais repetida e avisa.
+  const duvidas = {};
+  const distintos = (l) => [...new Set(l.map((v) => JSON.stringify(v)))].length;
+  if (leiturasStats.length && distintos(leiturasStats.map(semNivelItem)) > 1) duvidas.atributos = true;
+  const todosNiveis = [...new Set(infos.map((x) => nivelDe((x.stat && x.stat.statList) || [])).filter((x) => x && x.value).map((x) => x.value))];
+  if (todosNiveis.length > 1) duvidas.nivelItem = todosNiveis.sort((x, y) => x - y);
+
+  const stats = novo.atributos || [];
+  const asa = pw.map((x) => x.wing).find((w) => w && w.id);
+  const pet = pw.map((x) => x.pet).find((x) => x && x.id);
   return {
     ref: { servidor: ref.servidor, personagem: ref.personagem },
+    nc: { leituras: infos.length, faltam, velhos, duvidas },
     perfil: {
       nome: p.characterName,
       nivel: p.characterLevel,
       classe: p.className,
       pcId: p.pcId,
       poder: p.combatPower,
-      nivelItem: nivelItem ? nivelItem.value : null,
+      nivelItem: novo.nivelItem,
       raca: p.raceName,
       racaId: p.raceId,
       servidor: p.serverName,
@@ -58,13 +159,13 @@ async function ficha(ref, opts) {
       tituloGrau: p.titleGrade || null,
       retrato: /^https:\/\/profileimg\.plaync\.com\//.test(p.profileImage || '') ? p.profileImage : null,
     },
-    atributos: stats.filter((s) => s.type !== 'ItemLevel').map((s) => ({ nome: s.name, tipo: s.type, valor: s.value, extra: s.statSecondList || [] })),
+    atributos: stats.map((s) => ({ nome: s.name, tipo: s.type, valor: s.value, extra: s.statSecondList || [] })),
     titulos: {
       tem: (info.title && info.title.ownedCount) || 0,
       equipados: ((info.title && info.title.titleList) || []).map((t) => ({ id: t.id, nome: t.name, grau: t.grade, categoria: t.equipCategory, efeitos: descricoes(t.equipStatList), raridade: t.ownedPercent })),
     },
     tabuleiros: ((info.daevanion && info.daevanion.boardList) || []).map((b) => ({ id: b.id, nome: b.name, icone: b.icon, abertos: b.openNodeCount, total: b.totalNodeCount, aberto: b.open === 1 })),
-    equipamento: ((eq && eq.equipment && eq.equipment.equipmentList) || []).map((x) => ({
+    equipamento: (novo.equipamento || []).map((x) => ({
       casa: x.slotPos,
       casaNome: x.slotPosName,
       id: x.id,
@@ -74,9 +175,9 @@ async function ficha(ref, opts) {
       superacao: x.exceedLevel || 0,
       icone: x.icon,
     })),
-    asa: asa && asa.id ? { id: asa.id, nome: asa.name, grau: asa.grade, encantamento: asa.enchantLevel || 0, icone: asa.icon } : null,
-    mascote: pet && pet.id ? { id: pet.id, nome: pet.name, nivel: pet.level, icone: pet.icon } : null,
-    habilidades: ((eq && eq.skill && eq.skill.skillList) || []).map((s) => ({
+    asa: asa ? { id: asa.id, nome: asa.name, grau: asa.grade, encantamento: asa.enchantLevel || 0, icone: asa.icon } : null,
+    mascote: pet ? { id: pet.id, nome: pet.name, nivel: pet.level, icone: pet.icon } : null,
+    habilidades: (novo.habilidades || []).map((s) => ({
       id: s.id,
       nome: s.name,
       categoria: s.category,
@@ -96,9 +197,10 @@ async function itemEquipado(ref, { id, encantamento, casa }, opts) {
 
 /** A ficha de um item pelo id, sem personagem (a +0, ou com o encantamento pedido). */
 async function item(id, { idioma = 'pt-BR', encantamento = 0 } = {}) {
-  const j = await getJSON(`${NC}/${idioma.toLowerCase()}/api/gameconst/item${qs({ lang: idioma, id, enchantLevel: encantamento })}`, { intervaloMs: 200 });
-  if (!j || !j.id) return null;
-  return limparItem(j);
+  const j = await fichaItem(id, idioma, encantamento);
+  if (!j) return null;
+  // De Taiwan (o Global deixou de dar fichas): textos em inglês, fontes do servidor de lá.
+  return { ...limparItem(j), deTaiwan: !!j.deTaiwan };
 }
 
 function limparItem(j) {

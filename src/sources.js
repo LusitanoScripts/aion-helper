@@ -16,6 +16,8 @@
 // (516530001 = "Amplify Stone (Unique)" = "Pedra de Superação (Única)").
 // Nunca juntar pelo nome — o exchange está em inglês e o jogo em português.
 
+const fs = require('fs');
+const path = require('path');
 const { getJSON } = require('./http');
 
 const EXCHANGE = 'https://aion2.exchange/api';
@@ -123,10 +125,59 @@ async function profundidade(id, servidor) {
 
 // ── NC: ficha oficial do item ───────────────────────────────────────────────
 
+// A 12 Out 2026 a NC tirou esta rota do Global (404 "No static resource"; o
+// próprio site dela ficou sem fichas de itens). A de Taiwan é a mesma API, com
+// as mesmas chaves, mas só em inglês, coreano ou chinês: o nome no idioma do
+// jogo vem então das listas que a app traz (src/dados/itens.json e
+// mascotes.json), e só os itens que lá não estão ficam com o nome em inglês.
+const TW = 'https://tw.ncsoft.com/aion2/api/gameconst/item';
+let globalSemFichas = false;
+
+let nomesLocais = null;
+function doGlobal(id) {
+  if (!nomesLocais) {
+    nomesLocais = new Map();
+    for (const [f, chave] of [['itens.json', 'itens'], ['mascotes.json', 'mascotes']]) {
+      try {
+        const j = JSON.parse(fs.readFileSync(path.join(__dirname, 'dados', f), 'utf8'));
+        for (const x of j[chave]) nomesLocais.set(x.id, x);
+      } catch {
+        // Sem a lista: os nomes ficam em inglês.
+      }
+    }
+  }
+  const x = nomesLocais.get(Number(id));
+  return x || null;
+}
+
+/**
+ * A ficha crua de um item pelo id: a do Global se ainda existir, senão a de
+ * Taiwan com o nome trocado pelo da lista local. null se o id não existe.
+ */
+async function fichaItem(id, idioma = IDIOMA, encantamento = 0) {
+  if (!globalSemFichas) {
+    try {
+      const j = await getJSON(`${NC}/${idioma.toLowerCase()}/api/gameconst/item${qs({ lang: idioma, id, enchantLevel: encantamento })}`, { intervaloMs: 200 });
+      return j && j.id ? j : null; // id desconhecido: 200 com tudo a zero
+    } catch (e) {
+      if (e.status !== 404) throw e;
+      globalSemFichas = true;
+    }
+  }
+  const j = await getJSON(`${TW}${qs({ id, enchantLevel: encantamento, lang: 'en' })}`, { intervaloMs: 200 });
+  if (!j || !j.id) return null;
+  // Taiwan e o Global nem sempre dão o mesmo grau (Lâmina da Extinção de Ludra:
+  // Epic lá, Unique cá): o que a lista local tem é do Global e manda.
+  const x = doGlobal(j.id);
+  if (!x) return { ...j, deTaiwan: true };
+  const nome = x.n[idioma] || x.n['en-US'] || j.name;
+  const grau = x.g ? { grade: x.g, gradeName: (idioma === 'pt-BR' && x.gn) || x.g } : {};
+  return { ...j, ...grau, name: nome, deTaiwan: true };
+}
+
 async function fichaNC(id, idioma = IDIOMA) {
-  const url = `${NC}/${idioma.toLowerCase()}/api/gameconst/item${qs({ lang: idioma, id, enchantLevel: 0 })}`;
-  const j = await getJSON(url, { intervaloMs: 200 });
-  if (!j || !j.id) return null; // id desconhecido: 200 com tudo a zero
+  const j = await fichaItem(id, idioma);
+  if (!j) return null;
   return {
     id: j.id,
     nome: j.name || null,
@@ -151,5 +202,6 @@ module.exports = {
   historico,
   profundidade,
   fichaNC,
+  fichaItem,
   limparLinha,
 };

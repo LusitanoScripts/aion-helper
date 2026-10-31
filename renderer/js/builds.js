@@ -137,7 +137,8 @@
         const hs = st.habs.filter((h) => h.categoria === cat);
         if (!hs.length) return '';
         return `<div class="bl-linha"><div class="rot">${CAT_NOME[cat]}</div><div class="pecas">${hs
-          .map((h) => peca(h.id, { origem: 'paleta', extra: naBarra.has(h.id) ? ' usada' : '' }))
+          // Esbatidas só as que não entram na build (sem nível e fora da barra); as da barra levam uma marca no canto.
+          .map((h) => peca(h.id, { origem: 'paleta', extra: naBarra.has(h.id) ? ' na-barra' : nivelDe(h.id) ? '' : ' sem-nivel' }))
           .join('')}</div></div>`;
       })
       .join('');
@@ -328,7 +329,8 @@
     d.className = 'bl-colar';
     d.innerHTML = `<textarea rows="3" placeholder="cola aqui o código (AH1:…)"></textarea>
       <div class="bl-botoes"><button class="primario">Abrir</button><button>Cancelar</button></div><div class="erro"></div>`;
-    $('.bl-lista').insertBefore(d, $('.bl-lista .bl-botoes'));
+    // Há outra .bl-lista na aba Daevanion (escondida): tem de ser a desta aba.
+    $('#builds .bl-lista').insertBefore(d, $('#builds .bl-lista .bl-botoes'));
     const [abrirB, cancelar] = d.querySelectorAll('button');
     cancelar.addEventListener('click', () => d.remove());
     abrirB.addEventListener('click', async () => {
@@ -662,7 +664,7 @@
       $('#blPResultados').innerHTML = '';
       desenharTudo();
       agendarGravar();
-      estado(`Lidos os níveis de ${n} habilidades${nosDv > 0 ? ` e ${nosDv} nós do Daevanion` : nosDv < 0 ? ' (o Daevanion não veio)' : ''}.${nomes.length ? ` Estigmas equipados: <b>${nomes.map(esc).join(', ')}</b>.` : ''} A ficha não diz as especializações nem a barra: essas ficam como estavam.`);
+      estado(`Lidos os níveis de ${n} habilidades${nosDv > 0 ? ` e ${nosDv} nós do Daevanion` : nosDv < 0 ? ' (o Daevanion não veio)' : ''}.${nomes.length ? ` Estigmas equipados: <b>${nomes.map(esc).join(', ')}</b>.` : ''} A ficha não diz as especializações, a barra nem a ordem de prioridade: essas ficam como estavam.`);
     } catch (err) {
       $('#blPResultados').innerHTML = `<p class="erro">Não consegui ler a ficha: ${esc(err.message)}</p>`;
     }
@@ -704,7 +706,8 @@
       .map((t) => {
         const n = (dv[t.id] || []).length;
         const total = t.nos.filter((x) => x.tipo !== 'Start').length;
-        return `<button data-tab="${t.id}" class="${t.id === st.tabAtual ? 'on' : ''}"><img src="${esc(window.UI.icone(t.icone))}" alt="" /> ${esc(t.nome)} <small>${n}/${total}</small></button>`;
+        const g = window.Daevanion.gastoTabuleiro(t, dv[t.id] || []);
+        return `<button data-tab="${t.id}" class="${t.id === st.tabAtual ? 'on' : ''}" title="${esc(g.cristal)}: ${g.gasto} de ${g.total}"><img src="${esc(window.UI.icone(t.icone))}" alt="" /> ${esc(t.nome)} <small>${n}/${total} · ${g.gasto}◆</small></button>`;
       })
       .join('');
     const tab = st.tabs.find((t) => t.id === st.tabAtual);
@@ -730,6 +733,13 @@
     else if (no.classList.contains('pode')) dv[tab.id] = [...abertos, id];
     else return;
     if (!dv[tab.id].length) delete dv[tab.id];
+    desenharDv();
+    agendarGravar();
+  });
+
+  $('#dvLimparTodos').addEventListener('click', () => {
+    if (!st.atual) return;
+    st.atual.daevanion = {};
     desenharDv();
     agendarGravar();
   });
@@ -773,12 +783,13 @@
   window.Builds = {
     estado: () => st,
     /** Abre a aba numa build já guardada (a aba Personagem cria builds). */
-    abrirBuild: async (b) => {
+    abrirBuild: async (b, mensagem) => {
       document.querySelector('#abas [data-aba=builds]').click();
       for (let i = 0; i < 100 && !st.limites; i++) await new Promise((r) => setTimeout(r, 100));
       if (!st.limites) return;
       if (!st.lista.some((x) => x.id === b.id)) st.lista.push(b);
       await abrir(b.id);
+      if (mensagem) estado(mensagem);
     },
   };
 })();

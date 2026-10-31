@@ -101,7 +101,7 @@
       // Se o item está no mercado do servidor escolhido em Preços, mostra-se o preço.
       const linha = window.App && window.App.linha(id);
       const mercado = linha && linha.price ? `<div class="kpi destaque it-preco"><span>Mercado · ${esc(window.App.nomeServidor())}</span><b>${window.Precos.formatarKinah(linha.sold_avg_price || linha.price)}</b><small>${linha.sold_avg_price ? 'preço médio vendido' : 'anúncio mais barato'} · ${linha.listings || 0} anúncios</small></div>` : '';
-      d.innerHTML = enc + window.UI.cartaoItem(f) + mercado + `<p class="fonte">Item ${id} · ficha oficial da NC</p>`;
+      d.innerHTML = enc + window.UI.cartaoItem(f) + mercado + `<p class="fonte">Item ${id} · ${f.deTaiwan ? "ficha oficial da NC de Taiwan (o site do Global deixou de dar fichas a 12 Out): nome e grau do Global, o resto em inglês" : "ficha oficial da NC"}</p>`;
     } catch (e) {
       d.innerHTML = `<p class="erro">${esc(semPrefixo(e.message))}</p>`;
     }

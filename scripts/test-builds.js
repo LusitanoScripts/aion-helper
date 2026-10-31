@@ -148,6 +148,17 @@ async function main() {
     n++;
   }
 
+  // ── Daevanion: custo em cristais = grau do nó ──────────────────────────
+  {
+    const no = (id, tipo, grau) => ({ id, linha: 1, coluna: id + 1, tipo, grau, nome: '', efeitos: [] });
+    const tab = { nome: 'Nezekan', nos: [no(0, 'Start', 'None'), no(1, 'Stat', 'Common'), no(2, 'SkillLevel', 'Rare'), no(3, 'SkillLevel', 'Legend'), no(4, 'Stat', 'Unique')] };
+    assert.deepStrictEqual(tab.nos.map(D.custo), [0, 1, 2, 3, 4]);
+    assert.deepStrictEqual(D.gastoTabuleiro(tab, [1, 4]), { gasto: 5, total: 10, cristal: 'Cristal Daevanion' });
+    assert.strictEqual(D.cristal('Azphel'), 'Cristal de Batalha');
+    assert.strictEqual(D.cristal('Ariel'), 'Cristal de Conquista');
+    n++;
+  }
+
   console.log(`test-builds: ${n} testes passaram`);
 }
 
